@@ -1,0 +1,104 @@
+{
+  "_meta": {
+    "generated_at": "2026-04-07",
+    "description": "Published benchmark snapshots with exact TokenSaver compression metrics.",
+    "tokenizer": "o200k_base"
+  },
+  "benchmarks": [
+    {
+      "project": "confidential_flutter_app_a",
+      "display_name": "Confidential Flutter App A",
+      "framework": "flutter",
+      "plugin": "flutter",
+      "runtime_seconds": 55.53,
+      "scan": {
+        "total_files": 10264,
+        "total_tokens": 16067711
+      },
+      "repo": {
+        "source_file_count": 5445,
+        "union_source_tokens": 8510170,
+        "bundle_tokens": 157466,
+        "compression_ratio": 54.04449214433592,
+        "overlap_source_tokens": 1456590
+      },
+      "artifacts": {
+        "project_summary": {
+          "source_tokens": 7213,
+          "output_tokens": 999,
+          "compression_ratio": 7.22022022022022
+        },
+        "module_graph": {
+          "source_tokens": 8502957,
+          "output_tokens": 98412,
+          "compression_ratio": 86.40162785026216
+        },
+        "api_index": {
+          "source_tokens": 76946,
+          "output_tokens": 27454,
+          "compression_ratio": 2.8027245574415387
+        },
+        "route_index": {
+          "source_tokens": 1231871,
+          "output_tokens": 23891,
+          "compression_ratio": 51.5621363693441
+        },
+        "config_index": {
+          "source_tokens": 147773,
+          "output_tokens": 6657,
+          "compression_ratio": 22.198137299083673
+        }
+      }
+    },
+    {
+      "project": "confidential_react_native_app_b",
+      "display_name": "Confidential React Native App B",
+      "framework": "react_native",
+      "plugin": "react_native",
+      "runtime_seconds": 16.76,
+      "scan": {
+        "total_files": 896,
+        "total_tokens": 806286
+      },
+      "repo": {
+        "source_file_count": 885,
+        "union_source_tokens": 804476,
+        "bundle_tokens": 28394,
+        "compression_ratio": 28.332605480030992,
+        "overlap_source_tokens": 358707
+      },
+      "artifacts": {
+        "project_summary": {
+          "source_tokens": 4070,
+          "output_tokens": 729,
+          "compression_ratio": 5.5829903978052124
+        },
+        "commands": {
+          "source_tokens": 1763,
+          "output_tokens": 1643,
+          "compression_ratio": 1.07303712720633
+        },
+        "module_graph": {
+          "source_tokens": 800406,
+          "output_tokens": 14929,
+          "compression_ratio": 53.614173755777344
+        },
+        "api_index": {
+          "source_tokens": 180115,
+          "output_tokens": 6777,
+          "compression_ratio": 26.577394127194925
+        },
+        "route_index": {
+          "source_tokens": 176829,
+          "output_tokens": 4259,
+          "compression_ratio": 41.51890115050481
+        },
+        "config_index": {
+          "source_tokens": 0,
+          "output_tokens": 57,
+          "compression_ratio": null
+        }
+      }
+    }
+  ]
+}

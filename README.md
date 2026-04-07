@@ -58,7 +58,12 @@ TokenSaver includes a reproducible `benchmark` command for cross-repo validation
 - persists `BENCHMARK.json` next to the generated artifacts
 - records runtime, framework, selected plugin, exact scan totals, and compression metrics
 
-This is intended to be framework-level validation, similar in spirit to open benchmark harnesses such as [MemPalace](https://github.com/milla-jovovich/mempalace), but the reported numbers stay focused on exact token compression rather than retrieval-quality claims.
+Committed benchmark snapshots live in `benchmarks/results.json` and `benchmarks/results.md`.
+
+Current published results:
+
+- `Confidential Flutter app A` (`flutter`): `54.04x` covered-set compression, `55.53s` runtime
+- `Confidential React Native app B` (`react_native`): `28.33x` covered-set compression, `16.76s` runtime
 
 ## Output Contract
 
