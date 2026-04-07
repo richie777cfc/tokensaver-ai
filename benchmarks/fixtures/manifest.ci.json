@@ -46,6 +46,42 @@
       "expected_framework": "nextjs",
       "tags": ["fixture", "nextjs"],
       "private": false
+    },
+    {
+      "id": "fastapi-fixture",
+      "label": "FastAPI Fixture",
+      "publish_label": "FastAPI Fixture",
+      "root": "./fastapi_fixture",
+      "expected_framework": "fastapi",
+      "tags": ["fixture", "fastapi"],
+      "private": false
+    },
+    {
+      "id": "django-fixture",
+      "label": "Django Fixture",
+      "publish_label": "Django Fixture",
+      "root": "./django_fixture",
+      "expected_framework": "django",
+      "tags": ["fixture", "django"],
+      "private": false
+    },
+    {
+      "id": "spring-boot-fixture",
+      "label": "Spring Boot Fixture",
+      "publish_label": "Spring Boot Fixture",
+      "root": "./spring_boot_fixture",
+      "expected_framework": "spring_boot",
+      "tags": ["fixture", "spring-boot"],
+      "private": false
+    },
+    {
+      "id": "go-fixture",
+      "label": "Go Fixture",
+      "publish_label": "Go Fixture",
+      "root": "./go_fixture",
+      "expected_framework": "go",
+      "tags": ["fixture", "go"],
+      "private": false
     }
   ]
 }

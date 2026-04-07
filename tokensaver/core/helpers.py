@@ -112,15 +112,44 @@ def module_roots(root: Path, framework: str) -> list[Path]:
             base_dir = root / base_name
             if base_dir.exists():
                 candidates.extend(path for path in sorted(base_dir.iterdir()) if path.is_dir())
-    elif framework == "python":
-        for base_name in ("src",):
+    elif framework in {"python", "fastapi", "django", "flask"}:
+        for base_name in ("src", "app"):
             base_dir = root / base_name
             if base_dir.exists() and base_dir.is_dir():
                 candidates.extend(path for path in sorted(base_dir.iterdir()) if path.is_dir())
         for child in sorted(root.iterdir()):
-            if child.is_dir() and ((child / "__init__.py").exists() or any(path.suffix == ".py" for path in child.iterdir())):
+            if child.is_dir() and child not in candidates and (
+                (child / "__init__.py").exists()
+                or any(path.suffix == ".py" for path in child.iterdir())
+            ):
                 candidates.append(child)
         if not candidates and any(path.suffix == ".py" for path in root.iterdir() if path.is_file()):
+            candidates.append(root)
+    elif framework == "spring_boot":
+        src_main = root / "src" / "main" / "java"
+        if src_main.exists():
+            candidates.extend(path for path in sorted(src_main.rglob("*")) if path.is_dir() and any(f.suffix in {".java", ".kt"} for f in path.iterdir() if f.is_file()))
+        src_kt = root / "src" / "main" / "kotlin"
+        if src_kt.exists():
+            candidates.extend(path for path in sorted(src_kt.rglob("*")) if path.is_dir() and any(f.suffix == ".kt" for f in path.iterdir() if f.is_file()))
+        if not candidates:
+            for base in ("src",):
+                base_dir = root / base
+                if base_dir.exists():
+                    candidates.extend(path for path in sorted(base_dir.iterdir()) if path.is_dir())
+    elif framework == "go":
+        for base_name in ("cmd", "internal", "pkg", "api", "handlers", "routes", "server"):
+            base_dir = root / base_name
+            if base_dir.exists():
+                candidates.append(base_dir)
+                candidates.extend(path for path in sorted(base_dir.iterdir()) if path.is_dir())
+        if not candidates:
+            candidates.extend(
+                child
+                for child in sorted(root.iterdir())
+                if child.is_dir() and any(f.suffix == ".go" for f in child.rglob("*.go"))
+            )
+        if not candidates and any(root.glob("*.go")):
             candidates.append(root)
     else:
         candidates.extend(

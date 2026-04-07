@@ -168,6 +168,7 @@ def scan_project(root: str | Path) -> ScanResult:
 def _detect_framework(root: Path) -> str:
     if (root / "pubspec.yaml").exists():
         return "flutter"
+
     package_json = root / "package.json"
     if package_json.exists():
         try:
@@ -185,17 +186,85 @@ def _detect_framework(root: Path) -> str:
         if "react" in deps:
             return "react"
         return "node"
-    if (root / "pyproject.toml").exists() or (root / "requirements.txt").exists():
-        return "python"
+
+    if (root / "build.gradle.kts").exists() or (root / "build.gradle").exists():
+        if _has_spring_boot(root):
+            return "spring_boot"
+        return "android_native"
+
+    if (root / "pom.xml").exists():
+        if _has_spring_boot(root):
+            return "spring_boot"
+
+    python_framework = _detect_python_framework(root)
+    if python_framework:
+        return python_framework
+
     if (root / "Cargo.toml").exists():
         return "rust"
     if (root / "go.mod").exists():
         return "go"
-    if (root / "build.gradle.kts").exists() or (root / "build.gradle").exists():
-        return "android_native"
     if any(root.glob("*.py")) or any(child.is_dir() and (child / "__init__.py").exists() for child in root.iterdir()):
         return "python"
     return "unknown"
+
+
+def _has_spring_boot(root: Path) -> bool:
+    """Check if a Java/Kotlin project uses Spring Boot."""
+    for gradle_name in ("build.gradle.kts", "build.gradle"):
+        gradle = root / gradle_name
+        if gradle.exists():
+            content = gradle.read_text(errors="ignore")[:3000]
+            if "spring-boot" in content or "org.springframework.boot" in content:
+                return True
+    pom = root / "pom.xml"
+    if pom.exists():
+        content = pom.read_text(errors="ignore")[:5000]
+        if "spring-boot" in content:
+            return True
+    src_main = root / "src" / "main" / "java"
+    if src_main.exists():
+        for fp in src_main.rglob("*Application.java"):
+            try:
+                content = fp.read_text(errors="ignore")[:1000]
+                if "@SpringBootApplication" in content:
+                    return True
+            except OSError:
+                continue
+    return False
+
+
+def _detect_python_framework(root: Path) -> str | None:
+    """Detect specific Python web framework (FastAPI, Django, Flask) or generic Python."""
+    has_manage_py = (root / "manage.py").exists()
+    has_pyproject = (root / "pyproject.toml").exists()
+    has_requirements = (root / "requirements.txt").exists()
+
+    if not has_manage_py and not has_pyproject and not has_requirements:
+        return None
+
+    if has_manage_py:
+        return "django"
+
+    dep_content = ""
+    if has_requirements:
+        try:
+            dep_content += (root / "requirements.txt").read_text(errors="ignore").lower()
+        except OSError:
+            pass
+    if has_pyproject:
+        try:
+            dep_content += (root / "pyproject.toml").read_text(errors="ignore").lower()
+        except OSError:
+            pass
+
+    if "django" in dep_content:
+        return "django"
+    if "fastapi" in dep_content:
+        return "fastapi"
+    if "flask" in dep_content:
+        return "flask"
+    return "python"
 
 
 def _detect_package_managers(root: Path) -> list[str]:

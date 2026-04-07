@@ -30,6 +30,10 @@ FIXTURES_DIR = REPO_ROOT / "benchmarks" / "fixtures"
 FIRST_CLASS_FIXTURES = {
     "flutter": FIXTURES_DIR / "flutter_fixture",
     "react_native": FIXTURES_DIR / "react_native_fixture",
+    "fastapi": FIXTURES_DIR / "fastapi_fixture",
+    "django": FIXTURES_DIR / "django_fixture",
+    "spring_boot": FIXTURES_DIR / "spring_boot_fixture",
+    "go": FIXTURES_DIR / "go_fixture",
 }
 
 GENERIC_SUPPORTED_FIXTURES = {

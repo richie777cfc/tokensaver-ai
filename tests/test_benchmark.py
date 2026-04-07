@@ -128,8 +128,8 @@ class BenchmarkContractTests(unittest.TestCase):
             public_json = json.loads(Path(result["public_path"]).read_text())
             markdown = Path(result["md_path"]).read_text()
 
-        self.assertEqual(suite_json["summary"]["benchmark_count"], 5)
-        self.assertEqual(public_json["summary"]["benchmark_count"], 5)
+        self.assertEqual(suite_json["summary"]["benchmark_count"], 9)
+        self.assertEqual(public_json["summary"]["benchmark_count"], 9)
         self.assertIn("Benchmark Results", markdown)
         public_text = json.dumps(public_json)
         self.assertNotIn(str(Path.home()), public_text)

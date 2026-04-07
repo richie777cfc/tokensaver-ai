@@ -28,7 +28,7 @@ from tokensaver.core.models import ArtifactResult, BuildContext
 @dataclass(frozen=True)
 class GenericPlugin:
     name: str = "generic"
-    frameworks: set[str] = frozenset({"react", "nextjs", "node", "python", "unknown", "rust", "go", "android_native"})
+    frameworks: set[str] = frozenset({"react", "node", "python", "unknown", "rust", "android_native"})
 
     def build_artifacts(self, ctx: BuildContext) -> list[ArtifactResult]:
         return [

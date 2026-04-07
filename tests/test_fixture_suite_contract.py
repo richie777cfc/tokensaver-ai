@@ -21,7 +21,11 @@ from tokensaver.benchmark import benchmark_suite
 REPO_ROOT = Path(__file__).resolve().parents[1]
 FIXTURE_MANIFEST = REPO_ROOT / "benchmarks" / "fixtures" / "manifest.ci.json"
 
-EXPECTED_BENCHMARK_IDS = {"flutter-fixture", "react-native-fixture", "python-fixture", "node-fixture", "nextjs-fixture"}
+EXPECTED_BENCHMARK_IDS = {
+    "flutter-fixture", "react-native-fixture", "python-fixture",
+    "node-fixture", "nextjs-fixture", "fastapi-fixture",
+    "django-fixture", "spring-boot-fixture", "go-fixture",
+}
 
 SUITE_SUMMARY_REQUIRED_KEYS = {
     "benchmark_count",
@@ -112,6 +116,10 @@ class FixtureSuiteContractTests(unittest.TestCase):
             "python-fixture",
             "node-fixture",
             "nextjs-fixture",
+            "fastapi-fixture",
+            "django-fixture",
+            "spring-boot-fixture",
+            "go-fixture",
         ]
         for fixture_id in supported_ids:
             self.assertEqual(

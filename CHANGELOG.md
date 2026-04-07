@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.1.0
+
+- Added 4 new first-class framework plugins:
+  - **Next.js** (`nextjs`) — App Router + Pages Router file-based routes, API route handlers, server actions, `next.config` extraction, `NEXT_PUBLIC_*` env vars
+  - **FastAPI / Django / Flask** (`python_web`) — decorator routes, Django URL patterns, ORM/Pydantic models, middleware, `settings.py` keys
+  - **Spring Boot** (`spring_boot`) — `@GetMapping`/`@PostMapping` annotations, `@Entity` models, JPA repositories, `application.properties`/`.yml` config
+  - **Go** (`go`) — `net/http`, Gin, Chi, Echo, Fiber route extraction, Go structs, `os.Getenv`/Viper config, `go.mod` dependencies
+- Enhanced framework detection:
+  - Django detected via `manage.py` or dependency mentions
+  - FastAPI/Flask detected via `requirements.txt`/`pyproject.toml` dependency names
+  - Spring Boot detected via `build.gradle`/`pom.xml` Spring Boot references or `@SpringBootApplication` annotation
+- Improved `module_roots` for Go (cmd/internal/pkg convention), Spring Boot (src/main/java), and Python web (app/ directory)
+- Total first-class plugin count: 7 (Flutter, React Native, Next.js, FastAPI/Django/Flask, Spring Boot, Go) + generic fallback
+- Rewrote README with benchmark tables, one-liner install, architecture diagram, and plugin guide
+
 ## 1.0.1
 
 - Fixed packaged CLI installation by including `tokensaver_cli.py` in setuptools `py-modules`
