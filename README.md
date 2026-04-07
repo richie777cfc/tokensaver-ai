@@ -2,7 +2,7 @@
 
 TokenSaver compiles a repository into a small set of machine-readable context files so coding agents can answer common repo questions without opening most source files.
 
-Status: alpha
+Status: beta
 
 License: MIT
 
@@ -59,6 +59,14 @@ Supported plugin paths today:
 - `flutter`
 - `react_native`
 - `generic` fallback for other detected stacks
+
+## Documentation
+
+- [Output Schema](docs/OUTPUT_SCHEMA.md)
+- [Known Limitations](docs/KNOWN_LIMITATIONS.md)
+- [Benchmark Guide](benchmarks/README.md)
+- [Contributing](CONTRIBUTING.md)
+- [Changelog](CHANGELOG.md)
 
 `build` writes these files to `docs/tokensaver/`:
 
