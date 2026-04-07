@@ -13,6 +13,9 @@ output/
 benchmarks/fixtures/**/.cursor/
 benchmarks/fixtures/**/AGENTS.md
 benchmarks/fixtures/**/CLAUDE.md
+benchmarks/fixtures/**/.windsurfrules
+benchmarks/fixtures/**/.mcp.json
+.tokensaver_snapshot.json
 
 # Private benchmark manifests and raw private suite outputs
 benchmarks/local/

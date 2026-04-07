@@ -15,7 +15,7 @@ authors = [
 dependencies = [
   "tiktoken>=0.7.0"
 ]
-keywords = ["agents", "codebase", "benchmark", "tokens", "context"]
+keywords = ["agents", "codebase", "benchmark", "tokens", "context", "mcp"]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
@@ -28,8 +28,12 @@ classifiers = [
   "Topic :: Utilities"
 ]
 
+[project.optional-dependencies]
+mcp = ["fastmcp>=3.0.0"]
+
 [project.scripts]
 tokensaver = "tokensaver_cli:main"
+tokensaver-mcp = "tokensaver.mcp_server:main"
 
 [tool.setuptools]
 include-package-data = true

@@ -11,12 +11,18 @@ from tokensaver.core.models import BuildContext
 from tokensaver.core.registry import get_plugin
 from tokensaver.integrations import install_integrations
 from tokensaver.scanner import scan_project
+from tokensaver.snapshot import build_snapshot, changed_artifacts, load_snapshot, save_snapshot
 from tokensaver.tokenizer import count_file_tokens, tokenizer_name
 
 OUTPUT_DIRNAME = "docs/tokensaver"
 
 
-def build_project(root: str | Path, output_dir: str | Path | None = None) -> dict:
+def build_project(
+    root: str | Path,
+    output_dir: str | Path | None = None,
+    *,
+    force: bool = False,
+) -> dict:
     """Generate TokenSaver artifacts and metrics for a repository."""
     root = Path(root).resolve()
     output_dir = Path(output_dir).resolve() if output_dir else (root / OUTPUT_DIRNAME)
@@ -25,14 +31,31 @@ def build_project(root: str | Path, output_dir: str | Path | None = None) -> dic
     scan = scan_project(root)
     ctx = BuildContext(root=root, scan=scan)
     plugin = get_plugin(scan.framework)
-    artifacts = build_common_artifacts(ctx) + plugin.build_artifacts(ctx)
+    all_artifacts = build_common_artifacts(ctx) + plugin.build_artifacts(ctx)
 
-    for artifact in artifacts:
+    new_snapshot = build_snapshot(all_artifacts, root)
+    old_snapshot = None if force else load_snapshot(output_dir)
+
+    if old_snapshot is not None:
+        dirty_names = changed_artifacts(old_snapshot, new_snapshot)
+    else:
+        dirty_names = {a.name for a in all_artifacts}
+
+    rebuilt = []
+    skipped = []
+    for artifact in all_artifacts:
         out_path = output_dir / artifact.file_name
-        out_path.write_text(json.dumps(artifact.payload, indent=2) + "\n")
-        artifact.output_tokens = count_file_tokens(out_path)
+        if artifact.name in dirty_names or not out_path.exists():
+            out_path.write_text(json.dumps(artifact.payload, indent=2) + "\n")
+            artifact.output_tokens = count_file_tokens(out_path)
+            rebuilt.append(artifact.name)
+        else:
+            artifact.output_tokens = count_file_tokens(out_path)
+            skipped.append(artifact.name)
 
-    metrics_payload = _build_metrics(scan.project_name, scan.framework, artifacts)
+    save_snapshot(output_dir, new_snapshot)
+
+    metrics_payload = _build_metrics(scan.project_name, scan.framework, all_artifacts)
     metrics_path = output_dir / "METRICS.json"
     metrics_path.write_text(json.dumps(metrics_payload, indent=2) + "\n")
 
@@ -40,11 +63,13 @@ def build_project(root: str | Path, output_dir: str | Path | None = None) -> dic
 
     return {
         "scan": scan,
-        "artifacts": artifacts,
+        "artifacts": all_artifacts,
         "metrics": metrics_payload,
         "output_dir": output_dir,
         "plugin": plugin.name,
         "integrations": integration_paths,
+        "rebuilt": rebuilt,
+        "skipped": skipped,
     }
 
 

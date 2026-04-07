@@ -3,12 +3,14 @@
 TokenSaver CLI — Compile repositories into minimal agent context.
 
 Usage:
-  python tokensaver_cli.py scan <path>     # Inspect the repo and print exact source token stats
-  python tokensaver_cli.py build <path> [--output-dir <dir>]
-  python tokensaver_cli.py metrics <path> [--output-dir <dir>]
-  python tokensaver_cli.py benchmark <path> [--output-dir <dir>]
-  python tokensaver_cli.py benchmark-suite <manifest.json> [--output-dir <dir>] [--previous <snapshot.json>] [--public-only]
-  python tokensaver_cli.py diff-snapshots <old.json> <new.json>
+  tokensaver scan <path>
+  tokensaver build <path> [--output-dir <dir>] [--force]
+  tokensaver impact <path> [--output-dir <dir>] [--files file1,file2,...]
+  tokensaver serve <path> [--output-dir <dir>]
+  tokensaver metrics <path> [--output-dir <dir>]
+  tokensaver benchmark <path> [--output-dir <dir>]
+  tokensaver benchmark-suite <manifest.json> [--output-dir <dir>] [--previous <snapshot.json>] [--public-only]
+  tokensaver diff-snapshots <old.json> <new.json>
 """
 
 from __future__ import annotations
@@ -26,6 +28,7 @@ from tokensaver.benchmark import (
     diff_snapshots,
 )
 from tokensaver.eval import load_metrics, print_metrics
+from tokensaver.impact import compute_impact
 from tokensaver.scanner import scan_project
 
 
@@ -65,30 +68,90 @@ def cmd_scan(project_path: str):
     return result
 
 
-def cmd_build(project_path: str, output_dir: str | None = None):
+def cmd_build(project_path: str, output_dir: str | None = None, *, force: bool = False):
     """Generate all context artifacts for a project."""
-    result = build_project(project_path, output_dir=output_dir)
+    result = build_project(project_path, output_dir=output_dir, force=force)
     metrics = result["metrics"]
+    skipped = set(result.get("skipped", []))
 
     print(f"\nBuilt TokenSaver artifacts in {result['output_dir']}\n")
     for artifact in metrics["artifacts"]:
         ratio = artifact["compression_ratio"]
         ratio_text = f"{ratio:.2f}x" if ratio else "n/a"
+        status = "  (cached)" if artifact["name"] in skipped else ""
         print(
             f"  {artifact['name']:<20} "
             f"{artifact['source_tokens']:>10,} -> {artifact['output_tokens']:>10,} "
-            f"({ratio_text})"
+            f"({ratio_text}){status}"
         )
+
+    if skipped:
+        print(f"\n  {len(skipped)} artifact(s) unchanged, {len(result.get('rebuilt', []))} rebuilt")
 
     integrations = result.get("integrations", {})
     if integrations:
         print(f"\nInstalled agent integrations:")
-        labels = {"cursor": "Cursor", "claude": "Claude Code", "codex": "Codex"}
+        labels = {
+            "cursor": "Cursor",
+            "claude": "Claude Code",
+            "codex": "Codex",
+            "cursor_mcp": "Cursor MCP",
+            "claude_mcp": "Claude MCP",
+            "windsurf": "Windsurf",
+        }
         for key, path in integrations.items():
             print(f"  {labels.get(key, key):<14} {path}")
 
     print()
     print_metrics(metrics)
+    return result
+
+
+def cmd_impact(project_path: str, output_dir: str | None = None, files: str | None = None):
+    """Blast-radius change-impact analysis."""
+    changed_files = files.split(",") if files else None
+    result = compute_impact(project_path, output_dir=output_dir, changed_files=changed_files)
+    summary = result["summary"]
+
+    print(f"\n{'=' * 60}")
+    print("TokenSaver Impact Analysis")
+    print(f"{'=' * 60}\n")
+
+    print(f"Changed files:     {summary['files_changed']}")
+    print(f"Modules affected:  {summary['modules_affected']}")
+    print(f"APIs affected:     {summary['apis_affected']}")
+    print(f"Routes affected:   {summary['routes_affected']}")
+    print(f"Configs affected:  {summary['configs_affected']}")
+
+    if result["affected_modules"]:
+        print(f"\nAffected modules:")
+        for mod in result["affected_modules"]:
+            print(f"  {mod['name']:<30} {mod['changed_files']} changed / {mod['total_files']} total files")
+
+    if result["affected_apis"]:
+        print(f"\nAffected API endpoints ({len(result['affected_apis'])}):")
+        for api in result["affected_apis"][:20]:
+            print(f"  {api['method']:>4}  {api['endpoint']}")
+            print(f"        -> {api['name']}  ({api['file']})")
+        if len(result["affected_apis"]) > 20:
+            print(f"  ... and {len(result['affected_apis']) - 20} more")
+
+    if result["affected_routes"]:
+        print(f"\nAffected routes ({len(result['affected_routes'])}):")
+        for route in result["affected_routes"][:20]:
+            print(f"  {route['route']:<40} ({route['file']})")
+        if len(result["affected_routes"]) > 20:
+            print(f"  ... and {len(result['affected_routes']) - 20} more")
+
+    if result["affected_configs"]:
+        print(f"\nAffected configs ({len(result['affected_configs'])}):")
+        for cfg in result["affected_configs"][:20]:
+            print(f"  {cfg['key']:<30} type={cfg['type']}  ({cfg['file']})")
+
+    if summary["files_changed"] == 0:
+        print("\n  No changes detected. Specify --files or make changes first.")
+
+    print()
     return result
 
 
@@ -285,7 +348,20 @@ def main():
         if not os.path.isdir(target):
             print(f"Error: {target} is not a directory")
             sys.exit(1)
-        cmd_build(target, output_dir=output_dir)
+        force = "--force" in remaining
+        cmd_build(target, output_dir=output_dir, force=force)
+    elif command == "serve":
+        if not os.path.isdir(target):
+            print(f"Error: {target} is not a directory")
+            sys.exit(1)
+        from tokensaver.mcp_server import main as serve_main
+        serve_main(project_path=target, output_dir=output_dir)
+    elif command == "impact":
+        if not os.path.isdir(target):
+            print(f"Error: {target} is not a directory")
+            sys.exit(1)
+        files_arg = _parse_flag(remaining, "--files")
+        cmd_impact(target, output_dir=output_dir, files=files_arg)
     elif command in {"metrics", "eval"}:
         if not os.path.isdir(target):
             print(f"Error: {target} is not a directory")
