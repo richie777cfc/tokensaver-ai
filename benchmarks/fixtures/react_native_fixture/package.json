@@ -1,0 +1,17 @@
+{
+  "name": "react-native-fixture",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "react-native start",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@react-navigation/native": "^6.1.0",
+    "@react-navigation/native-stack": "^6.9.0",
+    "axios": "^1.7.0",
+    "react": "^18.2.0",
+    "react-native": "^0.76.0",
+    "react-native-config": "^1.5.0"
+  }
+}

@@ -248,6 +248,10 @@ def _parse_flag(argv: list[str], flag: str) -> str | None:
 
 
 def main():
+    if len(sys.argv) < 2 or sys.argv[1] in {"-h", "--help", "help"}:
+        print(__doc__)
+        sys.exit(0)
+
     if len(sys.argv) < 3:
         print(__doc__)
         sys.exit(1)

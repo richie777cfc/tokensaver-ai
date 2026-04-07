@@ -1,0 +1,33 @@
+{
+  "name": "public-fixture-suite",
+  "output_root": "./output/fixture-suite",
+  "benchmarks": [
+    {
+      "id": "flutter-fixture",
+      "label": "Flutter Fixture",
+      "publish_label": "Flutter Fixture",
+      "root": "./flutter_fixture",
+      "expected_framework": "flutter",
+      "tags": ["fixture", "flutter"],
+      "private": false
+    },
+    {
+      "id": "react-native-fixture",
+      "label": "React Native Fixture",
+      "publish_label": "React Native Fixture",
+      "root": "./react_native_fixture",
+      "expected_framework": "react_native",
+      "tags": ["fixture", "react-native"],
+      "private": false
+    },
+    {
+      "id": "python-fixture",
+      "label": "Python Fixture",
+      "publish_label": "Python Fixture",
+      "root": "./python_fixture",
+      "expected_framework": "python",
+      "tags": ["fixture", "python"],
+      "private": false
+    }
+  ]
+}

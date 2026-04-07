@@ -53,7 +53,7 @@ def build_api_index(ctx: BuildContext) -> ArtifactResult:
         module = module_name_for_file(ctx.root, file_path)
 
         if file_path.suffix == ".py":
-            for _, method, path in match_with_lines(content, PYTHON_API_PATTERN):
+            for _, method, path in match_with_lines(content, PYTHON_API_PATTERN, method_group=1, path_group=2):
                 if add_api_file_entry(api_files, rel_path=rel_path, module=module, path=path, name="", method=method.upper()):
                     endpoint_count += 1
                 source_files.add(file_path)

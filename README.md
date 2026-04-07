@@ -2,6 +2,12 @@
 
 TokenSaver compiles a repository into a small set of machine-readable context files so coding agents can answer common repo questions without opening most source files.
 
+Status: alpha
+
+License: MIT
+
+Commercial use is allowed under the MIT license.
+
 The project is intentionally narrow:
 - exact token accounting with `tiktoken`
 - normalized context artifacts
@@ -9,6 +15,24 @@ The project is intentionally narrow:
 - core framework plus technology plugins
 
 It does not estimate model pricing or invent savings claims.
+
+## Install
+
+```bash
+python3 -m pip install .
+```
+
+Installed CLI:
+
+```bash
+tokensaver --help
+```
+
+Or run directly from the repo:
+
+```bash
+python3 tokensaver_cli.py --help
+```
 
 ## Architecture
 
@@ -21,14 +45,20 @@ TokenSaver is split into three layers:
 ## Commands
 
 ```bash
-python3 tokensaver_cli.py scan .
-python3 tokensaver_cli.py build .
-python3 tokensaver_cli.py metrics .
-python3 tokensaver_cli.py benchmark .
-python3 tokensaver_cli.py benchmark-suite benchmarks/manifest.example.json
-python3 tokensaver_cli.py benchmark-suite <manifest.json> --previous <snapshot.json>
-python3 tokensaver_cli.py diff-snapshots <old.json> <new.json>
+tokensaver scan .
+tokensaver build .
+tokensaver metrics .
+tokensaver benchmark .
+tokensaver benchmark-suite benchmarks/manifest.example.json
+tokensaver benchmark-suite <manifest.json> --previous <snapshot.json>
+tokensaver diff-snapshots <old.json> <new.json>
 ```
+
+Supported plugin paths today:
+
+- `flutter`
+- `react_native`
+- `generic` fallback for other detected stacks
 
 `build` writes these files to `docs/tokensaver/`:
 
@@ -75,6 +105,23 @@ Suite runs are resilient: one repo failure does not abort the whole suite. Each 
 Use `diff-snapshots` to compare two historical snapshots and detect regressions.
 
 See `benchmarks/README.md` for the full manifest format and private-manifest workflow.
+
+## Release Checks
+
+This repo ships with public fixture projects and CI smoke checks.
+
+Run them locally:
+
+```bash
+python3 scripts/release_smoke.py
+```
+
+The smoke check verifies:
+
+- package imports and `py_compile`
+- tracked-file leak scan
+- benchmark-suite execution against public fixture repos
+- suite JSON/public JSON/Markdown generation
 
 ## Output Contract
 

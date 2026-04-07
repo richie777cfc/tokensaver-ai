@@ -26,6 +26,12 @@ Compare against a previous run:
 python3 tokensaver_cli.py benchmark-suite <manifest.json> --previous <snapshot.json>
 ```
 
+Public fixture smoke suite:
+
+```bash
+python3 tokensaver_cli.py benchmark-suite benchmarks/fixtures/manifest.ci.json
+```
+
 ## Outputs
 
 Each single benchmark writes:
@@ -98,6 +104,8 @@ For running benchmarks against private local repos:
 ## Tracked Snapshots
 
 Published benchmark snapshots in `benchmarks/results.json` and `benchmarks/results.md` contain only anonymized data. Do not add confidential repo names or local paths to these files.
+
+The repository also includes public benchmark fixtures under `benchmarks/fixtures/` for CI and smoke testing. These fixtures are synthetic and safe to publish.
 
 ## Snapshot History and Diffing
 
