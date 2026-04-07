@@ -28,6 +28,15 @@
       "expected_framework": "python",
       "tags": ["fixture", "python"],
       "private": false
+    },
+    {
+      "id": "node-fixture",
+      "label": "Node.js Fixture",
+      "publish_label": "Node.js Fixture",
+      "root": "./node_fixture",
+      "expected_framework": "node",
+      "tags": ["fixture", "node"],
+      "private": false
     }
   ]
 }

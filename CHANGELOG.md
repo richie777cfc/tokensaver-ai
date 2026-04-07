@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.0
+
+- Added explicit `schema_version` to all canonical artifact `_meta` blocks
+- Added compatibility policy documentation (`docs/COMPATIBILITY.md`)
+- Added contract/golden tests for build output shapes, public export sanitization, and fixture suite stability
+- Added `--public-only` mode to `benchmark-suite` for safe publishing (omits raw JSON and history)
+- Added Node.js backend public fixture for generic plugin coverage
+- Strengthened CI with contract test steps, public-only verification, and schema version checks
+- Extended release smoke script to scan docs, tests, and scripts for leaks; verify schema versions; and test public-only mode
+- Updated support matrix, readiness docs, and output schema documentation
+- Updated output schema docs to document `schema_version`, stable vs volatile fields, and public-only mode
+
 ## 0.4.0
 
 - Added schema, limitations, changelog, and contribution docs

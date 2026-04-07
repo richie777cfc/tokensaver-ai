@@ -128,11 +128,23 @@ class BenchmarkContractTests(unittest.TestCase):
             public_json = json.loads(Path(result["public_path"]).read_text())
             markdown = Path(result["md_path"]).read_text()
 
-        self.assertEqual(suite_json["summary"]["benchmark_count"], 3)
-        self.assertEqual(public_json["summary"]["benchmark_count"], 3)
+        self.assertEqual(suite_json["summary"]["benchmark_count"], 4)
+        self.assertEqual(public_json["summary"]["benchmark_count"], 4)
         self.assertIn("Benchmark Results", markdown)
         public_text = json.dumps(public_json)
         self.assertNotIn(str(Path.home()), public_text)
+
+    def test_benchmark_suite_public_only_omits_raw_outputs(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            result = benchmark_suite(FIXTURE_MANIFEST, output_root=temp_dir, public_only=True)
+            output_root = Path(temp_dir)
+            self.assertIsNone(result["suite_path"])
+            self.assertIsNone(result["snapshot_path"])
+            self.assertTrue((output_root / "SUITE_RESULTS.public.json").exists())
+            self.assertTrue((output_root / "SUITE_RESULTS.md").exists())
+            self.assertFalse((output_root / "SUITE_RESULTS.json").exists())
+            self.assertFalse((output_root / "history").exists())
+            self.assertEqual(list(output_root.glob("*/BENCHMARK.json")), [])
 
 
 if __name__ == "__main__":

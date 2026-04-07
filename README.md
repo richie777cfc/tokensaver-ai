@@ -2,7 +2,7 @@
 
 TokenSaver compiles a repository into a small set of machine-readable context files so coding agents can answer common repo questions without opening most source files.
 
-Status: beta
+Status: beta (approaching stable)
 
 License: MIT
 
@@ -10,7 +10,7 @@ Commercial use is allowed under the MIT license.
 
 The project is intentionally narrow:
 - exact token accounting with `tiktoken`
-- normalized context artifacts
+- normalized context artifacts with stable, versioned output schemas
 - deduplicated compression metrics
 - core framework plus technology plugins
 
@@ -51,22 +51,32 @@ tokensaver metrics .
 tokensaver benchmark .
 tokensaver benchmark-suite benchmarks/manifest.example.json
 tokensaver benchmark-suite <manifest.json> --previous <snapshot.json>
+tokensaver benchmark-suite <manifest.json> --public-only
 tokensaver diff-snapshots <old.json> <new.json>
 ```
 
-Supported plugin paths today:
+## Support Matrix
 
-- `flutter`
-- `react_native`
-- `generic` fallback for other detected stacks
+| Stack | Plugin | Status |
+|-------|--------|--------|
+| Flutter | `flutter` | First-class extraction |
+| React Native | `react_native` | First-class extraction |
+| Node.js / Express | `generic` | Generic extraction (commands, API routes, env config) |
+| Python (FastAPI, Flask, etc.) | `generic` | Generic extraction (API routes, env config) |
+| Next.js | `generic` | Generic extraction (file-based routes, commands) |
+| React (web) | `generic` | Generic extraction |
+| Rust, Go, Android Native | `generic` | Framework detection only; limited artifact depth |
 
 ## Documentation
 
-- [Output Schema](docs/OUTPUT_SCHEMA.md)
-- [Known Limitations](docs/KNOWN_LIMITATIONS.md)
-- [Benchmark Guide](benchmarks/README.md)
+- [Output Schema](docs/OUTPUT_SCHEMA.md) — canonical artifact shapes
+- [Compatibility Policy](docs/COMPATIBILITY.md) — versioning, backward compatibility, deprecation
+- [Known Limitations](docs/KNOWN_LIMITATIONS.md) — current boundaries
+- [Benchmark Guide](benchmarks/README.md) — manifest format, privacy workflow
 - [Contributing](CONTRIBUTING.md)
 - [Changelog](CHANGELOG.md)
+
+## Build Outputs
 
 `build` writes these files to `docs/tokensaver/`:
 
@@ -77,6 +87,8 @@ Supported plugin paths today:
 - `ROUTE_INDEX.json`
 - `CONFIG_INDEX.json`
 - `METRICS.json`
+
+Every artifact carries `schema_version` in its `_meta` block. See [Compatibility Policy](docs/COMPATIBILITY.md) for versioning semantics.
 
 ## Metric Semantics
 
@@ -112,6 +124,16 @@ Suite runs are resilient: one repo failure does not abort the whole suite. Each 
 
 Use `diff-snapshots` to compare two historical snapshots and detect regressions.
 
+### Public-Safe Publishing
+
+Use `--public-only` to generate only public-safe outputs:
+
+```bash
+tokensaver benchmark-suite <manifest.json> --output-dir results/ --public-only
+```
+
+In this mode, only `SUITE_RESULTS.public.json` and `SUITE_RESULTS.md` are written. No raw suite JSON, history snapshots, or per-benchmark raw artifacts are produced under the output directory. This is the recommended path for publishing benchmark results.
+
 See `benchmarks/README.md` for the full manifest format and private-manifest workflow.
 
 ## Release Checks
@@ -127,8 +149,10 @@ python3 scripts/release_smoke.py
 The smoke check verifies:
 
 - package imports and `py_compile`
-- tracked-file leak scan
-- benchmark-suite execution against public fixture repos
+- tracked-file leak scan (docs, tests, scripts, source)
+- schema version presence in all canonical outputs
+- benchmark-suite execution against public fixtures
+- public-only mode produces only safe outputs
 - suite JSON/public JSON/Markdown generation
 
 ## Output Contract
@@ -139,4 +163,16 @@ Every extracted fact should include:
 - `extractor`
 - `confidence`
 
+Every canonical artifact carries `schema_version` in `_meta`. See [Compatibility Policy](docs/COMPATIBILITY.md).
+
 If TokenSaver cannot determine a value with enough confidence, it should leave that area empty rather than guessing.
+
+## Roadmap to v1.0.0
+
+Before marking a future release as `v1.0.0`:
+
+- All contract tests must pass for every supported stack
+- Public fixtures must cover each first-class plugin and at least one generic stack
+- Compatibility policy must be fully documented and tested
+- No known regressions in CI
+- Schema version must be stable at `1.0.0` for at least one minor release cycle

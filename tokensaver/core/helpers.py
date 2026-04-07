@@ -6,6 +6,7 @@ import re
 from datetime import UTC, datetime
 from pathlib import Path
 
+from tokensaver import SCHEMA_VERSION
 from tokensaver.tokenizer import count_file_tokens
 
 CODE_EXTENSIONS = {
@@ -76,6 +77,7 @@ RN_CONFIG_IMPORT_PATTERN = re.compile(
 
 def meta(root: Path, extractor: str, source_files: set[Path]) -> dict:
     return {
+        "schema_version": SCHEMA_VERSION,
         "generated_at": timestamp(),
         "extractor": extractor,
         "source_files": sorted(str(path.relative_to(root)) for path in source_files if path.exists()),

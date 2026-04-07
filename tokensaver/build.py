@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from tokensaver import SCHEMA_VERSION
 from tokensaver.core.common_artifacts import build_common_artifacts
 from tokensaver.core.models import BuildContext
 from tokensaver.core.registry import get_plugin
@@ -77,6 +78,7 @@ def _build_metrics(project_name: str, framework: str, artifacts: list) -> dict:
 
     return {
         "_meta": {
+            "schema_version": SCHEMA_VERSION,
             "extractor": "metrics_v1",
         },
         "project": project_name,

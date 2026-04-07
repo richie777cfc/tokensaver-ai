@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from tokensaver import SCHEMA_VERSION
 from tokensaver.core.helpers import (
     ENV_PATTERNS,
     NODE_API_PATTERN,
@@ -119,6 +120,7 @@ def build_route_index(ctx: BuildContext) -> ArtifactResult:
 
     payload = {
         "_meta": {
+            "schema_version": SCHEMA_VERSION,
             "generated_at": timestamp(),
             "extractor": "route_index_v1",
             "entry_schema": ["path", "screen", "usage_count", "aliases", "navigated_from"],

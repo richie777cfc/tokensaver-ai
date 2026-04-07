@@ -7,7 +7,7 @@ Usage:
   python tokensaver_cli.py build <path> [--output-dir <dir>]
   python tokensaver_cli.py metrics <path> [--output-dir <dir>]
   python tokensaver_cli.py benchmark <path> [--output-dir <dir>]
-  python tokensaver_cli.py benchmark-suite <manifest.json> [--output-dir <dir>] [--previous <snapshot.json>]
+  python tokensaver_cli.py benchmark-suite <manifest.json> [--output-dir <dir>] [--previous <snapshot.json>] [--public-only]
   python tokensaver_cli.py diff-snapshots <old.json> <new.json>
 """
 
@@ -116,12 +116,15 @@ def cmd_benchmark_suite(
     manifest_path: str,
     output_dir: str | None = None,
     previous: str | None = None,
+    *,
+    public_only: bool = False,
 ):
     """Run a benchmark suite from a manifest and persist suite outputs."""
     result = benchmark_suite(
         manifest_path,
         output_root=output_dir,
         previous_snapshot_path=previous,
+        public_only=public_only,
     )
     suite = result["suite_results"]
     summary = suite.get("summary", {})
@@ -131,10 +134,15 @@ def cmd_benchmark_suite(
     print(f"{'=' * 60}\n")
 
     print(f"Manifest:          {result['manifest']}")
-    print(f"Results:           {result['suite_path']}")
+    if result.get("suite_path"):
+        print(f"Results:           {result['suite_path']}")
     print(f"Public results:    {result['public_path']}")
     print(f"Markdown:          {result['md_path']}")
-    print(f"Snapshot:          {result['snapshot_path']}\n")
+    if result.get("snapshot_path"):
+        print(f"Snapshot:          {result['snapshot_path']}")
+    if public_only:
+        print(f"Mode:              public-only")
+    print()
 
     print(f"Benchmarks:  {summary.get('benchmark_count', 0)}")
     print(f"Succeeded:   {summary.get('success_count', 0)}")
@@ -286,7 +294,8 @@ def main():
             print(f"Error: {target} is not a file")
             sys.exit(1)
         previous = _parse_flag(remaining, "--previous")
-        cmd_benchmark_suite(target, output_dir=output_dir, previous=previous)
+        public_only = "--public-only" in remaining
+        cmd_benchmark_suite(target, output_dir=output_dir, previous=previous, public_only=public_only)
     elif command == "diff-snapshots":
         if len(sys.argv) < 4:
             print("Usage: python tokensaver_cli.py diff-snapshots <old.json> <new.json>")

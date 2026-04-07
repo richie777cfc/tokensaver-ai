@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tokensaver"
-version = "0.4.0"
+version = "0.5.0"
 description = "Compile repositories into minimal agent context with exact token compression metrics."
 readme = "README.md"
 license = { file = "LICENSE" }

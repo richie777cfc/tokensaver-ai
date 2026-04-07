@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
+from tokensaver import SCHEMA_VERSION
 from tokensaver.core.helpers import (
     AXIOS_BASE_URL_PATTERN,
     AXIOS_CREATE_PATTERN,
@@ -213,6 +214,7 @@ def build_route_index(ctx: BuildContext) -> ArtifactResult:
 
     payload = {
         "_meta": {
+            "schema_version": SCHEMA_VERSION,
             "generated_at": timestamp(),
             "extractor": "react_native_route_index_v1",
             "entry_schema": ["path", "screen", "usage_count", "aliases", "navigated_from"],

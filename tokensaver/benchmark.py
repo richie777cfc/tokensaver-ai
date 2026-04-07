@@ -15,10 +15,12 @@ from __future__ import annotations
 import json
 import re
 import statistics
+import tempfile
 import time
 from datetime import UTC, datetime
 from pathlib import Path
 
+from tokensaver import SCHEMA_VERSION
 from tokensaver.build import build_project
 from tokensaver.core.helpers import timestamp
 
@@ -44,6 +46,7 @@ def benchmark_project(root: str | Path, output_dir: str | Path | None = None) ->
 
     payload = {
         "_meta": {
+            "schema_version": SCHEMA_VERSION,
             "extractor": "benchmark_v1",
             "generated_at": timestamp(),
         },
@@ -76,12 +79,18 @@ def benchmark_suite(
     manifest_path: str | Path,
     output_root: str | Path | None = None,
     previous_snapshot_path: str | Path | None = None,
+    *,
+    public_only: bool = False,
 ) -> dict:
     """Run a benchmark suite defined by a JSON manifest.
 
     One repo failure does not abort the whole suite.  Each result carries
     a status field (ok | partial | unsupported | failed) and an optional
     failure_reason.
+
+    When *public_only* is True, only public-safe outputs are written:
+    SUITE_RESULTS.public.json and SUITE_RESULTS.md.  Raw suite JSON and
+    history snapshots are omitted entirely.
     """
     manifest_path = Path(manifest_path).resolve()
     manifest = json.loads(manifest_path.read_text())
@@ -109,27 +118,42 @@ def benchmark_suite(
         root_raw = item.get("root", "")
 
         root = _resolve_path(root_raw, manifest_dir)
-        bench_output_dir = _resolve_path(
-            item.get("output_dir", str(resolved_output_root / bench_id)),
-            manifest_dir,
-        )
-
-        entry = _run_single_benchmark(
-            bench_id=bench_id,
-            label=label,
-            publish_label=publish_label,
-            expected_framework=expected_framework,
-            tags=tags,
-            private=private,
-            root=root,
-            bench_output_dir=bench_output_dir,
-        )
+        if public_only:
+            # Public-only mode must not leave raw benchmark artifacts under the
+            # requested output root. Run each benchmark in an isolated temp dir.
+            with tempfile.TemporaryDirectory(prefix=f"tokensaver-{bench_id}-") as temp_dir:
+                entry = _run_single_benchmark(
+                    bench_id=bench_id,
+                    label=label,
+                    publish_label=publish_label,
+                    expected_framework=expected_framework,
+                    tags=tags,
+                    private=private,
+                    root=root,
+                    bench_output_dir=Path(temp_dir),
+                )
+        else:
+            bench_output_dir = _resolve_path(
+                item.get("output_dir", str(resolved_output_root / bench_id)),
+                manifest_dir,
+            )
+            entry = _run_single_benchmark(
+                bench_id=bench_id,
+                label=label,
+                publish_label=publish_label,
+                expected_framework=expected_framework,
+                tags=tags,
+                private=private,
+                root=root,
+                bench_output_dir=bench_output_dir,
+            )
         suite_results.append(entry)
 
     summary = compute_suite_summary(suite_results)
 
     payload = {
         "_meta": {
+            "schema_version": SCHEMA_VERSION,
             "extractor": "benchmark_suite_v2",
             "generated_at": timestamp(),
             "manifest": str(manifest_path),
@@ -139,18 +163,24 @@ def benchmark_suite(
         "results": suite_results,
     }
 
-    suite_path = resolved_output_root / "SUITE_RESULTS.json"
-    suite_path.write_text(json.dumps(payload, indent=2) + "\n")
-
     public_payload = export_public_results(payload)
     public_path = resolved_output_root / "SUITE_RESULTS.public.json"
     public_path.write_text(json.dumps(public_payload, indent=2) + "\n")
 
-    md_text = generate_suite_markdown(payload, previous_snapshot_path=previous_snapshot_path)
+    md_text = generate_suite_markdown(
+        public_payload if public_only else payload,
+        previous_snapshot_path=previous_snapshot_path,
+    )
     md_path = resolved_output_root / "SUITE_RESULTS.md"
     md_path.write_text(md_text)
 
-    snapshot_path = save_snapshot(payload, resolved_output_root)
+    suite_path = None
+    snapshot_path = None
+
+    if not public_only:
+        suite_path = resolved_output_root / "SUITE_RESULTS.json"
+        suite_path.write_text(json.dumps(payload, indent=2) + "\n")
+        snapshot_path = save_snapshot(payload, resolved_output_root)
 
     return {
         "manifest": manifest_path,
