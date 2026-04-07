@@ -9,6 +9,11 @@ build/
 docs/tokensaver/
 output/
 
+# Integration files generated during fixture builds
+benchmarks/fixtures/**/.cursor/
+benchmarks/fixtures/**/AGENTS.md
+benchmarks/fixtures/**/CLAUDE.md
+
 # Private benchmark manifests and raw private suite outputs
 benchmarks/local/
 benchmarks/history/

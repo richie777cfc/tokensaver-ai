@@ -9,6 +9,7 @@ from tokensaver import SCHEMA_VERSION
 from tokensaver.core.common_artifacts import build_common_artifacts
 from tokensaver.core.models import BuildContext
 from tokensaver.core.registry import get_plugin
+from tokensaver.integrations import install_integrations
 from tokensaver.scanner import scan_project
 from tokensaver.tokenizer import count_file_tokens, tokenizer_name
 
@@ -35,12 +36,15 @@ def build_project(root: str | Path, output_dir: str | Path | None = None) -> dic
     metrics_path = output_dir / "METRICS.json"
     metrics_path.write_text(json.dumps(metrics_payload, indent=2) + "\n")
 
+    integration_paths = install_integrations(root, output_dir)
+
     return {
         "scan": scan,
         "artifacts": artifacts,
         "metrics": metrics_payload,
         "output_dir": output_dir,
         "plugin": plugin.name,
+        "integrations": integration_paths,
     }
 
 

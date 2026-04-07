@@ -80,6 +80,13 @@ def cmd_build(project_path: str, output_dir: str | None = None):
             f"({ratio_text})"
         )
 
+    integrations = result.get("integrations", {})
+    if integrations:
+        print(f"\nInstalled agent integrations:")
+        labels = {"cursor": "Cursor", "claude": "Claude Code", "codex": "Codex"}
+        for key, path in integrations.items():
+            print(f"  {labels.get(key, key):<14} {path}")
+
     print()
     print_metrics(metrics)
     return result
