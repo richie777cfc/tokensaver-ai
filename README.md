@@ -3,9 +3,9 @@
 **Compile any repository into minimal agent context — with exact token compression metrics.**
 
 ```bash
-pip install tokensaver
+pip install --no-build-isolation .
 tokensaver build .
-# Done. 60x compression. Zero config.
+# Done. 50x+ compression. Zero config.
 ```
 
 TokenSaver scans your codebase, extracts the structural facts that coding agents actually need (modules, APIs, routes, config, commands), and compresses them into 7 compact JSON artifacts. Agents read **thousands** of tokens instead of **hundreds of thousands**.
@@ -34,13 +34,11 @@ TokenSaver scans your codebase, extracts the structural facts that coding agents
 
 ## Quick Start
 
-### Install
+### Install from source
 
 ```bash
-# From PyPI
-pip install tokensaver
-
-# From source
+git clone https://github.com/richie777cfc/tokensaver.git
+cd tokensaver
 pip install --no-build-isolation .
 ```
 
@@ -82,14 +80,14 @@ tokensaver impact /path/to/repo --files src/auth/login.py,src/models/user.py
 ### MCP Server
 
 ```bash
-pip install tokensaver[mcp]
+pip install --no-build-isolation ".[mcp]"
 tokensaver serve /path/to/repo
 # Starts MCP server — agents can query modules, APIs, routes interactively
 ```
 
 ---
 
-## Supported Frameworks
+## Supported Frameworks (15 stacks, 11 plugins)
 
 ### First-Class Plugins (deep extraction)
 
@@ -98,10 +96,14 @@ tokensaver serve /path/to/repo
 | **Flutter** | `flutter` | `pubspec.yaml` | GetX routes, Dart API URLs, RemoteConfig keys, module graph |
 | **React Native** | `react_native` | `package.json` → `react-native` | Stack.Screen navigation, Axios/fetch APIs, RN Config, module graph |
 | **Next.js** | `nextjs` | `package.json` → `next` | App Router + Pages Router, API routes, server actions, `next.config`, `NEXT_PUBLIC_*` env |
-| **FastAPI** | `python_web` | `requirements.txt`/`pyproject.toml` → `fastapi` | Decorator routes, Pydantic models, middleware, env config |
+| **Angular** | `angular` | `package.json` → `@angular/core` | RouterModule routes, HttpClient APIs, `environment.ts` config, `@Component`/`@Injectable` |
+| **React (web)** | `react_web` | `package.json` → `react` | React Router v5+v6, fetch/axios APIs, `REACT_APP_*` env, lazy imports |
+| **FastAPI** | `python_web` | deps → `fastapi` | Decorator routes, Pydantic models, middleware, env config |
 | **Django** | `python_web` | `manage.py` or deps → `django` | URL patterns, ORM models, middleware, `settings.py` keys |
 | **Flask** | `python_web` | deps → `flask` | Route decorators, models, middleware, env config |
-| **Spring Boot** | `spring_boot` | `build.gradle`/`pom.xml` → `spring-boot` | `@GetMapping`/`@PostMapping`, `@Entity` models, JPA repositories, `application.properties`/`.yml` |
+| **Spring Boot** | `spring_boot` | `build.gradle`/`pom.xml` → `spring-boot` | `@GetMapping`/`@PostMapping`, `@Entity` models, JPA repos, `application.properties`/`.yml` |
+| **Android Native** | `android_native` | `build.gradle` (non-Spring) | Activities, Fragments, Jetpack Compose `composable()` routes, Retrofit APIs, `BuildConfig`, `strings.xml` |
+| **iOS (Swift)** | `ios_swift` | `.xcodeproj` / `Package.swift` | SwiftUI Views, NavigationLink, UIKit ViewControllers, URLSession/Alamofire APIs, UserDefaults, `@AppStorage`, Info.plist |
 | **Go** | `go` | `go.mod` | `net/http`, Gin, Chi, Echo, Fiber routes, structs, `os.Getenv`, Viper config, `go.mod` deps |
 
 ### Generic Fallback (all other projects)
@@ -110,9 +112,29 @@ tokensaver serve /path/to/repo
 |---|---|---|
 | Node.js / Express | `package.json` | Express routes, mount paths, `process.env`, module graph |
 | Python (generic) | `*.py` files | Decorator routes, env config, module graph |
-| React (web) | `package.json` → `react` | JSX routes, env config, module graph |
 | Rust | `Cargo.toml` | Module graph, framework detection |
-| Android Native | `build.gradle` (non-Spring) | Module graph, framework detection |
+
+---
+
+## Benchmark Results (13 fixture suite)
+
+All 13 fixtures pass with `ok` status, 100% framework detection accuracy:
+
+| Fixture | Framework | Status | Plugin |
+|---|---|---|---|
+| Flutter | `flutter` | ok | `flutter` |
+| React Native | `react_native` | ok | `react_native` |
+| Next.js | `nextjs` | ok | `nextjs` |
+| Angular | `angular` | ok | `angular` |
+| React Web | `react` | ok | `react_web` |
+| FastAPI | `fastapi` | ok | `python_web` |
+| Django | `django` | ok | `python_web` |
+| Spring Boot | `spring_boot` | ok | `spring_boot` |
+| Android Native | `android_native` | ok | `android_native` |
+| iOS Swift | `ios_swift` | ok | `ios_swift` |
+| Go | `go` | ok | `go` |
+| Node.js | `node` | ok | `generic` |
+| Python | `python` | ok | `generic` |
 
 ---
 
@@ -153,27 +175,31 @@ Every artifact carries `schema_version` in `_meta`. See [Output Schema](docs/OUT
 
 ```
 tokensaver/
-  core/           # Scan, build orchestration, plugin protocol, shared models
-    plugin_api.py  # TokenSaverPlugin protocol
-    registry.py    # Plugin registry (ordered matching)
-    helpers.py     # Shared regex patterns, utilities
-    models.py      # ArtifactResult, BuildContext
-  plugins/         # Framework-specific extractors
-    flutter.py     # Flutter (GetX, Dart APIs, RemoteConfig)
-    react_native.py # React Native (Stack navigation, Axios)
-    nextjs.py      # Next.js (App Router, API routes, server actions)
-    python_web.py  # FastAPI / Django / Flask
-    spring_boot.py # Spring Boot (annotations, JPA, properties)
-    go_mod.py      # Go (net/http, Gin, Chi, Echo, Fiber)
-    generic.py     # Fallback for all other stacks
-  scanner.py       # Framework detection + token accounting
-  build.py         # Build orchestration + incremental diffing
-  snapshot.py      # SHA-256 snapshot for incremental builds
-  impact.py        # Blast-radius change-impact analysis
-  integrations.py  # IDE/agent config file generation
-  mcp_server.py    # MCP server (FastMCP)
-  benchmark.py     # Reproducible benchmarking + suite runner
-tokensaver_cli.py  # CLI entry point
+  core/             # Scan, build orchestration, plugin protocol, shared models
+    plugin_api.py    # TokenSaverPlugin protocol
+    registry.py      # Plugin registry (ordered matching)
+    helpers.py       # Shared regex patterns, utilities
+    models.py        # ArtifactResult, BuildContext
+  plugins/           # Framework-specific extractors
+    flutter.py       # Flutter (GetX, Dart APIs, RemoteConfig)
+    react_native.py  # React Native (Stack navigation, Axios)
+    nextjs.py        # Next.js (App Router, API routes, server actions)
+    angular.py       # Angular (RouterModule, HttpClient, environment.ts)
+    react_web.py     # React web (React Router, fetch/axios, REACT_APP_*)
+    python_web.py    # FastAPI / Django / Flask
+    spring_boot.py   # Spring Boot (annotations, JPA, properties)
+    android_native.py # Android (Compose, Retrofit, BuildConfig, strings.xml)
+    ios_swift.py     # iOS (SwiftUI, UIKit, URLSession, UserDefaults)
+    go_mod.py        # Go (net/http, Gin, Chi, Echo, Fiber)
+    generic.py       # Fallback for all other stacks
+  scanner.py         # Framework detection + token accounting
+  build.py           # Build orchestration + incremental diffing
+  snapshot.py        # SHA-256 snapshot for incremental builds
+  impact.py          # Blast-radius change-impact analysis
+  integrations.py    # IDE/agent config file generation
+  mcp_server.py      # MCP server (FastMCP)
+  benchmark.py       # Reproducible benchmarking + suite runner
+tokensaver_cli.py    # CLI entry point
 ```
 
 ---
@@ -181,14 +207,14 @@ tokensaver_cli.py  # CLI entry point
 ## CLI Reference
 
 ```bash
-tokensaver scan <path>                    # Scan and report token counts
-tokensaver build <path> [--output-dir <dir>] [--force]  # Build artifacts
-tokensaver impact <path> [--files f1,f2]  # Blast-radius analysis
-tokensaver serve <path>                   # Start MCP server
-tokensaver metrics <path>                 # Print existing metrics
-tokensaver benchmark <path>               # Run reproducible benchmark
-tokensaver benchmark-suite <manifest>     # Run multi-repo benchmark suite
-tokensaver diff-snapshots <old> <new>     # Compare benchmark snapshots
+tokensaver scan <path>                                    # Scan and report token counts
+tokensaver build <path> [--output-dir <dir>] [--force]    # Build artifacts
+tokensaver impact <path> [--files f1,f2]                  # Blast-radius analysis
+tokensaver serve <path>                                   # Start MCP server
+tokensaver metrics <path>                                 # Print existing metrics
+tokensaver benchmark <path>                               # Run reproducible benchmark
+tokensaver benchmark-suite <manifest>                     # Run multi-repo benchmark suite
+tokensaver diff-snapshots <old> <new>                     # Compare benchmark snapshots
 ```
 
 ---

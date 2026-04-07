@@ -82,6 +82,42 @@
       "expected_framework": "go",
       "tags": ["fixture", "go"],
       "private": false
+    },
+    {
+      "id": "android-native-fixture",
+      "label": "Android Native Fixture",
+      "publish_label": "Android Native Fixture",
+      "root": "./android_native_fixture",
+      "expected_framework": "android_native",
+      "tags": ["fixture", "android"],
+      "private": false
+    },
+    {
+      "id": "ios-swift-fixture",
+      "label": "iOS Swift Fixture",
+      "publish_label": "iOS Swift Fixture",
+      "root": "./ios_swift_fixture",
+      "expected_framework": "ios_swift",
+      "tags": ["fixture", "ios"],
+      "private": false
+    },
+    {
+      "id": "react-web-fixture",
+      "label": "React Web Fixture",
+      "publish_label": "React Web Fixture",
+      "root": "./react_web_fixture",
+      "expected_framework": "react",
+      "tags": ["fixture", "react"],
+      "private": false
+    },
+    {
+      "id": "angular-fixture",
+      "label": "Angular Fixture",
+      "publish_label": "Angular Fixture",
+      "root": "./angular_fixture",
+      "expected_framework": "angular",
+      "tags": ["fixture", "angular"],
+      "private": false
     }
   ]
 }

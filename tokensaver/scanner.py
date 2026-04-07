@@ -169,6 +169,9 @@ def _detect_framework(root: Path) -> str:
     if (root / "pubspec.yaml").exists():
         return "flutter"
 
+    if _is_ios_project(root):
+        return "ios_swift"
+
     package_json = root / "package.json"
     if package_json.exists():
         try:
@@ -183,6 +186,8 @@ def _detect_framework(root: Path) -> str:
             return "react_native"
         if "next" in deps:
             return "nextjs"
+        if "@angular/core" in deps:
+            return "angular"
         if "react" in deps:
             return "react"
         return "node"
@@ -207,6 +212,20 @@ def _detect_framework(root: Path) -> str:
     if any(root.glob("*.py")) or any(child.is_dir() and (child / "__init__.py").exists() for child in root.iterdir()):
         return "python"
     return "unknown"
+
+
+def _is_ios_project(root: Path) -> bool:
+    """Detect native iOS/Swift projects (not Flutter, not RN)."""
+    has_xcodeproj = any(root.glob("*.xcodeproj")) or any(root.glob("*.xcworkspace"))
+    has_package_swift = (root / "Package.swift").exists()
+    if not has_xcodeproj and not has_package_swift:
+        return False
+    if (root / "pubspec.yaml").exists():
+        return False
+    if (root / "package.json").exists():
+        return False
+    has_swift_files = any(root.rglob("*.swift"))
+    return has_swift_files
 
 
 def _has_spring_boot(root: Path) -> bool:

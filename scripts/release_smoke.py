@@ -104,10 +104,10 @@ def _run_fixture_suite() -> None:
         public_json = json.loads((output_dir / "SUITE_RESULTS.public.json").read_text())
         suite_md = (output_dir / "SUITE_RESULTS.md").read_text()
 
-        if suite_json["summary"]["benchmark_count"] != 9:
-            raise SystemExit("Expected 9 fixture benchmarks in SUITE_RESULTS.json")
-        if public_json["summary"]["benchmark_count"] != 9:
-            raise SystemExit("Expected 9 fixture benchmarks in SUITE_RESULTS.public.json")
+        if suite_json["summary"]["benchmark_count"] != 13:
+            raise SystemExit("Expected 13 fixture benchmarks in SUITE_RESULTS.json")
+        if public_json["summary"]["benchmark_count"] != 13:
+            raise SystemExit("Expected 13 fixture benchmarks in SUITE_RESULTS.public.json")
         if "Benchmark Results" not in suite_md:
             raise SystemExit("Markdown suite report is missing benchmark results")
         public_json_text = json.dumps(public_json)
@@ -121,6 +121,8 @@ def _run_fixture_suite() -> None:
             "flutter-fixture", "react-native-fixture", "python-fixture",
             "node-fixture", "nextjs-fixture", "fastapi-fixture",
             "django-fixture", "spring-boot-fixture", "go-fixture",
+            "android-native-fixture", "ios-swift-fixture",
+            "react-web-fixture", "angular-fixture",
         ):
             status = results_by_id.get(fixture_id, {}).get("status", "missing")
             if status == "failed":
@@ -158,6 +160,8 @@ def _run_schema_version_check() -> None:
             "flutter-fixture", "react-native-fixture", "python-fixture",
             "node-fixture", "nextjs-fixture", "fastapi-fixture",
             "django-fixture", "spring-boot-fixture", "go-fixture",
+            "android-native-fixture", "ios-swift-fixture",
+            "react-web-fixture", "angular-fixture",
         ):
             bench_dir = output_dir / bench_id
             if not bench_dir.exists():

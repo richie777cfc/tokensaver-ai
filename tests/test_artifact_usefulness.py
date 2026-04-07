@@ -34,6 +34,10 @@ FIRST_CLASS_FIXTURES = {
     "django": FIXTURES_DIR / "django_fixture",
     "spring_boot": FIXTURES_DIR / "spring_boot_fixture",
     "go": FIXTURES_DIR / "go_fixture",
+    "android_native": FIXTURES_DIR / "android_native_fixture",
+    "ios_swift": FIXTURES_DIR / "ios_swift_fixture",
+    "react_web": FIXTURES_DIR / "react_web_fixture",
+    "angular": FIXTURES_DIR / "angular_fixture",
 }
 
 GENERIC_SUPPORTED_FIXTURES = {

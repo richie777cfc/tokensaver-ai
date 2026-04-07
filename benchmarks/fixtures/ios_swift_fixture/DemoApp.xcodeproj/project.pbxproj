@@ -1,0 +1,2 @@
+// !$*UTF8*$!
+// Minimal Xcode project marker for framework detection

@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.2.0
+
+- Added 4 new first-class framework plugins:
+  - **Android Native** (`android_native`) — Activities, Fragments, Jetpack Compose `composable()` navigation, Retrofit `@GET`/`@POST` annotations, Ktor routes, `BuildConfig` field extraction, Gradle dependencies, `strings.xml` resource keys
+  - **iOS / Swift** (`ios_swift`) — SwiftUI `View` structs, `NavigationLink`/`navigationDestination`, UIKit `UIViewController` subclasses, segue identifiers, `URLSession`/Alamofire API calls, `UserDefaults`, `@AppStorage`, `ProcessInfo.processInfo.environment`, `Bundle.main.infoDictionary`
+  - **React (web)** (`react_web`) — React Router v5 (`<Route path=...>`) + v6 (`{ path: ... }`) routes, `<Link to=...>`, `navigate()` calls, axios/fetch API extraction, `REACT_APP_*` env vars, `.env` file parsing
+  - **Angular** (`angular`) — `RouterModule` route definitions, `routerLink`/`router.navigate()`, `HttpClient` API calls, `environment.ts` config keys, `@Component`/`@Injectable` decorators
+- Enhanced framework detection:
+  - Angular detected via `@angular/core` in `package.json` dependencies
+  - iOS detected via `.xcodeproj`/`.xcworkspace`/`Package.swift` presence with `.swift` files
+  - Android Native remains the fallback for `build.gradle` without Spring Boot
+- Added `.swift` to `CODE_EXTENSIONS` for token accounting
+- Updated `module_roots` for Android Native (`app/src/main/java`), iOS (`*.swift` directories), and Angular (`src/app`)
+- Removed `react` and `android_native` from the generic plugin's framework set — both now have dedicated first-class plugins
+- Total first-class plugin count: 11 (Flutter, React Native, Next.js, Angular, React Web, FastAPI/Django/Flask, Spring Boot, Android Native, iOS Swift, Go) + generic fallback
+- Added 4 new benchmark fixtures; fixture suite now covers 13 stacks, all passing with 100% framework detection accuracy
+- Fixed README: removed invalid `pip install tokensaver` PyPI link, corrected all install instructions to source-based install, updated support matrix and architecture docs
+
 ## 1.1.0
 
 - Added 4 new first-class framework plugins:

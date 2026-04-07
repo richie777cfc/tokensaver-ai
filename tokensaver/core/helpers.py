@@ -20,6 +20,7 @@ CODE_EXTENSIONS = {
     ".java",
     ".go",
     ".rs",
+    ".swift",
 }
 
 ENV_PATTERNS = [
@@ -107,7 +108,7 @@ def module_roots(root: Path, framework: str) -> list[Path]:
         lib_dir = root / "lib"
         if lib_dir.exists():
             candidates.extend(path for path in sorted(lib_dir.iterdir()) if path.is_dir())
-    elif framework in {"react", "react_native", "nextjs", "node"}:
+    elif framework in {"react", "react_native", "nextjs", "node", "angular"}:
         for base_name in ("src", "app", "pages", "packages"):
             base_dir = root / base_name
             if base_dir.exists():
@@ -137,6 +138,22 @@ def module_roots(root: Path, framework: str) -> list[Path]:
                 base_dir = root / base
                 if base_dir.exists():
                     candidates.extend(path for path in sorted(base_dir.iterdir()) if path.is_dir())
+    elif framework == "android_native":
+        for base_name in ("app/src/main/java", "app/src/main/kotlin"):
+            base_dir = root / base_name
+            if base_dir.exists():
+                candidates.extend(path for path in sorted(base_dir.rglob("*")) if path.is_dir() and any(f.suffix in {".java", ".kt"} for f in path.iterdir() if f.is_file()))
+        if not candidates:
+            for child in sorted(root.iterdir()):
+                if child.is_dir() and any(child.rglob("*.kt")) or any(child.rglob("*.java")):
+                    candidates.append(child)
+    elif framework == "ios_swift":
+        for child in sorted(root.iterdir()):
+            if child.is_dir() and any(child.rglob("*.swift")):
+                if child.name not in ("Pods", ".build", "DerivedData", "Build", "Tests"):
+                    candidates.append(child)
+        if not candidates and any(root.glob("*.swift")):
+            candidates.append(root)
     elif framework == "go":
         for base_name in ("cmd", "internal", "pkg", "api", "handlers", "routes", "server"):
             base_dir = root / base_name
