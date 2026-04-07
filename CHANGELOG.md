@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1
+
+- Fixed packaged CLI installation by including `tokensaver_cli.py` in setuptools `py-modules`
+- Strengthened release smoke checks to verify the installed CLI module is importable
+- Clarified local install guidance for source installs in constrained environments
+
 ## 1.0.0
 
 - Promoted from beta to stable v1.0.0

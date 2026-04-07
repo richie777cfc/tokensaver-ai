@@ -19,8 +19,10 @@ It does not estimate model pricing or invent savings claims.
 ## Install
 
 ```bash
-python3 -m pip install .
+python3 -m pip install . --no-build-isolation
 ```
+
+For local source installs in constrained environments, prefer `--no-build-isolation` so pip does not try to download build dependencies.
 
 Installed CLI:
 

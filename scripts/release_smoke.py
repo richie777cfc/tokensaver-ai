@@ -231,6 +231,17 @@ def _run_package_install_check() -> None:
             check=True,
             stdout=subprocess.DEVNULL,
         )
+        subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                "import sys; sys.path.insert(0, sys.argv[1]); import tokensaver_cli; print(tokensaver_cli.__name__)",
+                str(target_dir),
+            ],
+            cwd=REPO_ROOT,
+            check=True,
+            stdout=subprocess.DEVNULL,
+        )
 
 
 def _load_private_leak_patterns() -> list[str]:
