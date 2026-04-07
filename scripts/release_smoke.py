@@ -104,10 +104,10 @@ def _run_fixture_suite() -> None:
         public_json = json.loads((output_dir / "SUITE_RESULTS.public.json").read_text())
         suite_md = (output_dir / "SUITE_RESULTS.md").read_text()
 
-        if suite_json["summary"]["benchmark_count"] != 4:
-            raise SystemExit("Expected 4 fixture benchmarks in SUITE_RESULTS.json")
-        if public_json["summary"]["benchmark_count"] != 4:
-            raise SystemExit("Expected 4 fixture benchmarks in SUITE_RESULTS.public.json")
+        if suite_json["summary"]["benchmark_count"] != 5:
+            raise SystemExit("Expected 5 fixture benchmarks in SUITE_RESULTS.json")
+        if public_json["summary"]["benchmark_count"] != 5:
+            raise SystemExit("Expected 5 fixture benchmarks in SUITE_RESULTS.public.json")
         if "Benchmark Results" not in suite_md:
             raise SystemExit("Markdown suite report is missing benchmark results")
         public_json_text = json.dumps(public_json)
@@ -117,10 +117,12 @@ def _run_fixture_suite() -> None:
             raise SystemExit("Markdown suite report leaked a temporary path")
 
         results_by_id = {item["id"]: item for item in suite_json["results"]}
-        if results_by_id["flutter-fixture"]["status"] == "failed":
-            raise SystemExit("Flutter fixture benchmark unexpectedly failed")
-        if results_by_id["react-native-fixture"]["status"] == "failed":
-            raise SystemExit("React Native fixture benchmark unexpectedly failed")
+        for fixture_id in ("flutter-fixture", "react-native-fixture", "python-fixture", "node-fixture", "nextjs-fixture"):
+            status = results_by_id.get(fixture_id, {}).get("status", "missing")
+            if status == "failed":
+                raise SystemExit(f"{fixture_id} benchmark unexpectedly failed")
+            if status != "ok":
+                raise SystemExit(f"{fixture_id} benchmark expected 'ok' but got '{status}'")
 
 
 def _run_schema_version_check() -> None:
@@ -148,7 +150,7 @@ def _run_schema_version_check() -> None:
         if "schema_version" not in public_json.get("_meta", {}):
             raise SystemExit("SUITE_RESULTS.public.json missing schema_version in _meta")
 
-        for bench_id in ("flutter-fixture", "react-native-fixture", "python-fixture"):
+        for bench_id in ("flutter-fixture", "react-native-fixture", "python-fixture", "node-fixture", "nextjs-fixture"):
             bench_dir = output_dir / bench_id
             if not bench_dir.exists():
                 continue

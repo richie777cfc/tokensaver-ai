@@ -37,6 +37,15 @@
       "expected_framework": "node",
       "tags": ["fixture", "node"],
       "private": false
+    },
+    {
+      "id": "nextjs-fixture",
+      "label": "Next.js Fixture",
+      "publish_label": "Next.js Fixture",
+      "root": "./nextjs_fixture",
+      "expected_framework": "nextjs",
+      "tags": ["fixture", "nextjs"],
+      "private": false
     }
   ]
 }

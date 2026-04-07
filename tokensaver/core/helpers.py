@@ -37,6 +37,10 @@ NODE_API_PATTERN = re.compile(
     r"(?:app|router)\.(get|post|put|delete|patch)\(\s*['\"]([^'\"]+)['\"]"
 )
 REACT_ROUTE_PATTERN = re.compile(r"<Route[^>]+path=['\"]([^'\"]+)['\"]")
+EXPRESS_USE_PATTERN = re.compile(r"(?:app|router)\.use\(\s*['\"]([^'\"]+)['\"]")
+PYTHON_ROUTE_PATTERN = re.compile(
+    r"@(?:\w+\.)?(?:app|router|bp|blueprint)\.(route|get|post|put|delete|patch)\(\s*['\"]([^'\"]+)['\"]"
+)
 GETX_ROUTE_CONST = re.compile(r"static\s+const\s+(\w+)\s*=\s*['\"]([^'\"]+)['\"]")
 GETX_ROUTE_BINDING = re.compile(
     r"GetPage\s*\([^)]*name\s*:\s*(?:AppRoutes\.)?(\w+)[^)]*page\s*:\s*\(\)\s*=>\s*(\w+)",
@@ -109,9 +113,15 @@ def module_roots(root: Path, framework: str) -> list[Path]:
             if base_dir.exists():
                 candidates.extend(path for path in sorted(base_dir.iterdir()) if path.is_dir())
     elif framework == "python":
+        for base_name in ("src",):
+            base_dir = root / base_name
+            if base_dir.exists() and base_dir.is_dir():
+                candidates.extend(path for path in sorted(base_dir.iterdir()) if path.is_dir())
         for child in sorted(root.iterdir()):
             if child.is_dir() and ((child / "__init__.py").exists() or any(path.suffix == ".py" for path in child.iterdir())):
                 candidates.append(child)
+        if not candidates and any(path.suffix == ".py" for path in root.iterdir() if path.is_file()):
+            candidates.append(root)
     else:
         candidates.extend(
             child

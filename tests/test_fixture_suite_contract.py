@@ -21,7 +21,7 @@ from tokensaver.benchmark import benchmark_suite
 REPO_ROOT = Path(__file__).resolve().parents[1]
 FIXTURE_MANIFEST = REPO_ROOT / "benchmarks" / "fixtures" / "manifest.ci.json"
 
-EXPECTED_BENCHMARK_IDS = {"flutter-fixture", "react-native-fixture", "python-fixture", "node-fixture"}
+EXPECTED_BENCHMARK_IDS = {"flutter-fixture", "react-native-fixture", "python-fixture", "node-fixture", "nextjs-fixture"}
 
 SUITE_SUMMARY_REQUIRED_KEYS = {
     "benchmark_count",
@@ -96,10 +96,33 @@ class FixtureSuiteContractTests(unittest.TestCase):
                     f"Result {result.get('id')} missing key: {key}",
                 )
 
-    def test_flutter_and_rn_not_failed(self) -> None:
+    def test_no_fixture_is_failed(self) -> None:
+        for result in self._suite["results"]:
+            self.assertNotEqual(
+                result["status"],
+                "failed",
+                f"{result['id']} should not be failed",
+            )
+
+    def test_supported_fixtures_are_ok(self) -> None:
         by_id = {r["id"]: r for r in self._suite["results"]}
-        self.assertNotEqual(by_id["flutter-fixture"]["status"], "failed")
-        self.assertNotEqual(by_id["react-native-fixture"]["status"], "failed")
+        supported_ids = [
+            "flutter-fixture",
+            "react-native-fixture",
+            "python-fixture",
+            "node-fixture",
+            "nextjs-fixture",
+        ]
+        for fixture_id in supported_ids:
+            self.assertEqual(
+                by_id[fixture_id]["status"],
+                "ok",
+                f"{fixture_id} should have status 'ok', got '{by_id[fixture_id]['status']}'",
+            )
+
+    def test_framework_detection_accuracy_is_perfect(self) -> None:
+        accuracy = self._suite["summary"]["framework_detection_accuracy"]
+        self.assertEqual(accuracy, 1.0, "All fixtures should have correct framework detection")
 
     def test_public_export_no_local_paths(self) -> None:
         text = json.dumps(self._public)

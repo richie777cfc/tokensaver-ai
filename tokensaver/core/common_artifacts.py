@@ -4,6 +4,11 @@ from __future__ import annotations
 
 import json
 
+try:
+    import tomllib
+except ModuleNotFoundError:
+    import tomli as tomllib  # type: ignore[no-redef]
+
 from tokensaver.core.helpers import categorize_command, language_source_refs, meta, sources, value_with_meta
 from tokensaver.core.models import ArtifactResult, BuildContext
 
@@ -68,6 +73,7 @@ def build_project_summary(ctx: BuildContext) -> ArtifactResult:
 
 def build_commands(ctx: BuildContext) -> ArtifactResult:
     root = ctx.root
+    scan = ctx.scan
     commands = []
     source_files = set()
 
@@ -91,6 +97,41 @@ def build_commands(ctx: BuildContext) -> ArtifactResult:
                 }
             )
         source_files.add(package_json)
+
+    pyproject = root / "pyproject.toml"
+    if pyproject.exists():
+        try:
+            pyproject_data = tomllib.loads(pyproject.read_text())
+        except Exception:
+            pyproject_data = {}
+        for name, command in pyproject_data.get("project", {}).get("scripts", {}).items():
+            commands.append(
+                {
+                    "name": name,
+                    "category": categorize_command(name),
+                    "command": command,
+                    "cwd": ".",
+                    "verified": False,
+                    "source": [{"file": "pyproject.toml"}],
+                    "extractor": "pyproject_scripts_v1",
+                    "confidence": 1.0,
+                }
+            )
+        for name, command in pyproject_data.get("tool", {}).get("taskipy", {}).get("tasks", {}).items():
+            commands.append(
+                {
+                    "name": name,
+                    "category": categorize_command(name),
+                    "command": command if isinstance(command, str) else str(command),
+                    "cwd": ".",
+                    "verified": False,
+                    "source": [{"file": "pyproject.toml"}],
+                    "extractor": "pyproject_taskipy_v1",
+                    "confidence": 0.9,
+                }
+            )
+        if pyproject_data:
+            source_files.add(pyproject)
 
     makefile = root / "Makefile"
     if makefile.exists():
@@ -136,6 +177,29 @@ def build_commands(ctx: BuildContext) -> ArtifactResult:
                     }
                 )
             source_files.add(workflow_file)
+
+    pubspec = root / "pubspec.yaml"
+    if scan.framework == "flutter" and pubspec.exists():
+        flutter_commands = [
+            ("pub_get", "setup", "flutter pub get", 0.95),
+            ("run", "dev", "flutter run", 0.95),
+            ("test", "test", "flutter test", 0.95),
+            ("analyze", "lint", "flutter analyze", 0.95),
+        ]
+        for name, category, command, confidence in flutter_commands:
+            commands.append(
+                {
+                    "name": name,
+                    "category": category,
+                    "command": command,
+                    "cwd": ".",
+                    "verified": False,
+                    "source": [{"file": "pubspec.yaml"}],
+                    "extractor": "flutter_standard_commands_v1",
+                    "confidence": confidence,
+                }
+            )
+        source_files.add(pubspec)
 
     return ArtifactResult(
         name="commands",

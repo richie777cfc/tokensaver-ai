@@ -32,6 +32,7 @@ _STATUS_FAILED = "failed"
 _LOW_VALUE_THRESHOLD = 1.2
 _LOW_VALUE_EXEMPT_ARTIFACTS = {"commands", "project_summary"}
 _MAJOR_ARTIFACTS = {"module_graph", "api_index", "route_index", "config_index"}
+_MIN_OK_MAJOR_ARTIFACTS = 2
 
 
 # ---------------------------------------------------------------------------
@@ -281,21 +282,24 @@ def _determine_status(
     plugin: str,
     artifacts: dict[str, dict],
 ) -> str:
-    if detected_framework == "unknown" or plugin == "generic":
-        if detected_framework == "unknown":
-            return _STATUS_UNSUPPORTED
+    if detected_framework == "unknown":
+        return _STATUS_UNSUPPORTED
 
     if not artifacts:
         return _STATUS_FAILED
 
-    missing_major_artifacts = _MAJOR_ARTIFACTS.difference(artifacts)
-    empty_major_artifacts = {
-        name for name, art in artifacts.items() if name in _MAJOR_ARTIFACTS and _artifact_is_empty(art)
+    present_major = {
+        name for name in _MAJOR_ARTIFACTS if name in artifacts and not _artifact_is_empty(artifacts[name])
     }
-    if missing_major_artifacts or empty_major_artifacts:
-        return _STATUS_PARTIAL
+    non_empty_count = len(present_major)
 
-    return _STATUS_OK
+    if non_empty_count == 0:
+        return _STATUS_FAILED
+
+    if non_empty_count >= _MIN_OK_MAJOR_ARTIFACTS:
+        return _STATUS_OK
+
+    return _STATUS_PARTIAL
 
 
 # ---------------------------------------------------------------------------

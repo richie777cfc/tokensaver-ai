@@ -7,8 +7,10 @@ from dataclasses import dataclass
 from tokensaver import SCHEMA_VERSION
 from tokensaver.core.helpers import (
     ENV_PATTERNS,
+    EXPRESS_USE_PATTERN,
     NODE_API_PATTERN,
     PYTHON_API_PATTERN,
+    PYTHON_ROUTE_PATTERN,
     REACT_ROUTE_PATTERN,
     add_api_file_entry,
     all_code_files,
@@ -105,18 +107,39 @@ def build_route_index(ctx: BuildContext) -> ArtifactResult:
         for file_path in all_code_files(ctx.root):
             if "test" in file_path.parts:
                 continue
-            if file_path.suffix not in {".js", ".jsx", ".ts", ".tsx"}:
-                continue
             content = file_path.read_text(errors="ignore")
             rel_path = str(file_path.relative_to(ctx.root))
-            for line_no, route_path in match_with_lines(content, REACT_ROUTE_PATTERN, value_group=1):
-                routes[route_path] = {
-                    "path": route_path,
-                    "source": [{"file": rel_path, "line": line_no}],
-                    "usage_count": 1,
-                    "navigated_from": [],
-                }
-                source_files.add(file_path)
+
+            if file_path.suffix in {".js", ".jsx", ".ts", ".tsx"}:
+                for line_no, route_path in match_with_lines(content, REACT_ROUTE_PATTERN, value_group=1):
+                    routes[route_path] = {
+                        "path": route_path,
+                        "source": [{"file": rel_path, "line": line_no}],
+                        "usage_count": 1,
+                        "navigated_from": [],
+                    }
+                    source_files.add(file_path)
+                for line_no, mount_path in match_with_lines(content, EXPRESS_USE_PATTERN, value_group=1):
+                    if mount_path.startswith("/"):
+                        routes[mount_path] = {
+                            "path": mount_path,
+                            "source": [{"file": rel_path, "line": line_no}],
+                            "usage_count": 1,
+                            "navigated_from": [],
+                        }
+                        source_files.add(file_path)
+
+            if file_path.suffix == ".py":
+                for line_no, _decorator, route_path in match_with_lines(
+                    content, PYTHON_ROUTE_PATTERN, method_group=1, path_group=2
+                ):
+                    routes[route_path] = {
+                        "path": route_path,
+                        "source": [{"file": rel_path, "line": line_no}],
+                        "usage_count": 1,
+                        "navigated_from": [],
+                    }
+                    source_files.add(file_path)
 
     payload = {
         "_meta": {
@@ -165,6 +188,36 @@ def build_config_index(ctx: BuildContext) -> ArtifactResult:
 
         if file_has_keys:
             source_files.add(file_path)
+
+    for env_name in (".env", ".env.example", ".env.sample"):
+        env_file = ctx.root / env_name
+        if env_file.exists() and env_file.is_file():
+            try:
+                env_content = env_file.read_text(errors="ignore")
+            except OSError:
+                continue
+            rel_path = env_name
+            for line_no, line in enumerate(env_content.splitlines(), start=1):
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                if "=" not in line:
+                    continue
+                key = line.split("=", 1)[0].strip()
+                if not key or not key.replace("_", "").isalnum():
+                    continue
+                entry = keys.setdefault(
+                    key,
+                    {
+                        "name": key,
+                        "types": set(),
+                        "references": [],
+                        "extractor": "dotenv_file_v1",
+                        "confidence": 0.85,
+                    },
+                )
+                entry["references"].append({"file": rel_path, "line": line_no})
+            source_files.add(env_file)
 
     payload = {
         "_meta": meta(ctx.root, "config_index_v1", source_files),

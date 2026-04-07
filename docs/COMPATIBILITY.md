@@ -89,6 +89,6 @@ No fields are currently deprecated.
 - The `manifest` field in `_meta` is omitted when it points to a local path.
 - Failure reason strings are sanitized to remove path fragments.
 
-## Pre-1.0 Stability Note
+## v1.0.0 Stability
 
-While `schema_version` is at `1.0.0`, the contract is considered stable for the documented fields. However, the project remains in beta — if a structural flaw is discovered that requires a breaking change, a major version bump will be issued with a migration note in `CHANGELOG.md`.
+Both `schema_version` and the package version are at `1.0.0`. The output contract is stable for all documented fields. All first-class and generic supported stacks are covered by public fixture benchmarks, usefulness tests, and contract tests. If a structural flaw is discovered that requires a breaking change, a major version bump will be issued with a migration note in `CHANGELOG.md`.

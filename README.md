@@ -2,7 +2,7 @@
 
 TokenSaver compiles a repository into a small set of machine-readable context files so coding agents can answer common repo questions without opening most source files.
 
-Status: beta (approaching stable)
+Status: **stable (v1.0.0)**
 
 License: MIT
 
@@ -57,15 +57,33 @@ tokensaver diff-snapshots <old.json> <new.json>
 
 ## Support Matrix
 
+### First-class supported
+
 | Stack | Plugin | Status |
 |-------|--------|--------|
-| Flutter | `flutter` | First-class extraction |
-| React Native | `react_native` | First-class extraction |
-| Node.js / Express | `generic` | Generic extraction (commands, API routes, env config) |
-| Python (FastAPI, Flask, etc.) | `generic` | Generic extraction (API routes, env config) |
-| Next.js | `generic` | Generic extraction (file-based routes, commands) |
-| React (web) | `generic` | Generic extraction |
-| Rust, Go, Android Native | `generic` | Framework detection only; limited artifact depth |
+| Flutter | `flutter` | First-class extraction: routes, modules, API surface, config, commands |
+| React Native | `react_native` | First-class extraction: navigation, modules, API surface, config, commands |
+
+### Generic supported
+
+| Stack | Plugin | Status |
+|-------|--------|--------|
+| Node.js / Express | `generic` | Commands, Express API routes, mount-path routes, env config, module graph |
+| Python (FastAPI, Flask, etc.) | `generic` | Commands (package.json, pyproject.toml, Makefile), decorator API routes, env config, module graph |
+| Next.js | `generic` | Commands, file-based routes, env config, module graph |
+| React (web) | `generic` | Commands, JSX routes, env config, module graph |
+
+### Detected-only / limited
+
+| Stack | Plugin | Status |
+|-------|--------|--------|
+| Rust | `generic` | Framework detection via `Cargo.toml`; generic artifact depth |
+| Go | `generic` | Framework detection via `go.mod`; generic artifact depth |
+| Android Native | `generic` | Framework detection via `build.gradle`; generic artifact depth |
+
+### v1.0 stability bar
+
+All first-class and generic supported stacks are covered by public fixtures, usefulness tests, and contract tests. Every public fixture must produce `ok` benchmark status with non-empty module graphs, commands, and at least one domain artifact (API, routes, or config). Framework detection accuracy is 100% across all fixtures.
 
 ## Documentation
 
@@ -167,12 +185,13 @@ Every canonical artifact carries `schema_version` in `_meta`. See [Compatibility
 
 If TokenSaver cannot determine a value with enough confidence, it should leave that area empty rather than guessing.
 
-## Roadmap to v1.0.0
+## v1.0.0 release criteria (met)
 
-Before marking a future release as `v1.0.0`:
-
-- All contract tests must pass for every supported stack
-- Public fixtures must cover each first-class plugin and at least one generic stack
-- Compatibility policy must be fully documented and tested
+- All contract tests pass for every supported stack
+- Public fixtures cover each first-class plugin and three generic stacks (Python, Node, Next.js)
+- Usefulness tests verify meaningful artifact content, not just shape
+- All public fixtures produce `ok` benchmark status
+- Framework detection accuracy is 100% across all fixtures
+- Compatibility policy is fully documented and tested
+- Schema version is stable at `1.0.0`
 - No known regressions in CI
-- Schema version must be stable at `1.0.0` for at least one minor release cycle

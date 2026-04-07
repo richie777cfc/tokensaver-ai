@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.0.0
+
+- Promoted from beta to stable v1.0.0
+- Generic plugin improvements:
+  - Python `module_roots` now discovers `src/` subdirectories and falls back to root when only top-level `.py` files exist
+  - Added Express mount-path route extraction (`app.use("/path", router)`)
+  - Added Python route decorator extraction for `route_index`
+  - Added `.env` / `.env.example` / `.env.sample` file parsing for `config_index`
+  - Added `pyproject.toml` `[project.scripts]` and `[tool.taskipy.tasks]` command extraction
+- Benchmark status logic updated: requires at least 2 non-empty major artifacts for `ok` status, acknowledging that not all artifact types apply to all stacks
+- Added Next.js public fixture with file-based routes, API routes, env config, and commands
+- Expanded Python fixture with package directory structure, route decorators, and env references
+- Added usefulness tests (`test_artifact_usefulness.py`) verifying meaningful content for all supported stacks
+- Strengthened fixture-suite contract tests: all public fixtures must be present, none may be `failed`, all supported fixtures must be `ok`
+- All 5 public fixtures (Flutter, React Native, Python, Node, Next.js) now produce `ok` benchmark status
+- Framework detection accuracy is 100% across all fixtures
+- Updated support matrix documentation with explicit first-class / generic supported / detected-only tiers
+- Updated release smoke checks to validate all 5 fixtures
+
 ## 0.5.0
 
 - Added explicit `schema_version` to all canonical artifact `_meta` blocks

@@ -1,0 +1,16 @@
+{
+  "name": "nextjs-fixture",
+  "version": "1.0.0",
+  "description": "Minimal Next.js fixture for TokenSaver benchmarks",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  }
+}
