@@ -1,16 +1,33 @@
 {
-  "name": "local-benchmark-suite",
+  "name": "example-benchmark-suite",
   "output_root": "./output/benchmark-suite",
   "benchmarks": [
     {
       "id": "flutter-app",
       "label": "Local Flutter App",
-      "root": "/absolute/path/to/flutter-app"
+      "publish_label": "Flutter App A",
+      "root": "/absolute/path/to/flutter-app",
+      "expected_framework": "flutter",
+      "tags": ["mobile", "flutter"],
+      "private": true
     },
     {
       "id": "react-native-app",
       "label": "Local React Native App",
-      "root": "/absolute/path/to/react-native-app"
+      "publish_label": "React Native App A",
+      "root": "/absolute/path/to/react-native-app",
+      "expected_framework": "react_native",
+      "tags": ["mobile", "react-native"],
+      "private": true
+    },
+    {
+      "id": "node-api",
+      "label": "Node API Server",
+      "publish_label": "Node API A",
+      "root": "/absolute/path/to/node-api",
+      "expected_framework": "node",
+      "tags": ["backend", "node"],
+      "private": true
     }
   ]
 }

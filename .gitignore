@@ -4,3 +4,7 @@ __pycache__/
 
 docs/tokensaver/
 output/
+
+# Private benchmark manifests and raw private suite outputs
+benchmarks/local/
+benchmarks/history/

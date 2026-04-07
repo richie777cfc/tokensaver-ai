@@ -26,6 +26,8 @@ python3 tokensaver_cli.py build .
 python3 tokensaver_cli.py metrics .
 python3 tokensaver_cli.py benchmark .
 python3 tokensaver_cli.py benchmark-suite benchmarks/manifest.example.json
+python3 tokensaver_cli.py benchmark-suite <manifest.json> --previous <snapshot.json>
+python3 tokensaver_cli.py diff-snapshots <old.json> <new.json>
 ```
 
 `build` writes these files to `docs/tokensaver/`:
@@ -59,13 +61,20 @@ TokenSaver includes a reproducible `benchmark` command for cross-repo validation
 - persists `BENCHMARK.json` next to the generated artifacts
 - records runtime, framework, selected plugin, exact scan totals, and compression metrics
 
-Committed benchmark snapshots live in `benchmarks/results.json` and `benchmarks/results.md`.
-Suite manifests can be defined with `benchmarks/manifest.example.json`.
+Suite manifests define multi-repo benchmark runs. Each suite run produces:
 
-Current published results:
+- `SUITE_RESULTS.json` — full results with status, failure reasons, and summary metrics
+- `SUITE_RESULTS.public.json` — safe public export with private identifiers stripped
+- `SUITE_RESULTS.md` — compact Markdown summary
+- `history/<timestamp>.json` — timestamped snapshots for regression tracking
 
-- `Confidential Flutter app A` (`flutter`): `54.04x` covered-set compression, `55.53s` runtime
-- `Confidential React Native app B` (`react_native`): `28.33x` covered-set compression, `16.76s` runtime
+Benchmark entries support `id`, `label`, `publish_label`, `root`, `expected_framework`, `tags`, and `private` fields. When `private=true`, public exports use `publish_label` instead of real repo names.
+
+Suite runs are resilient: one repo failure does not abort the whole suite. Each result carries a `status` (`ok`, `partial`, `unsupported`, `failed`) and optional `failure_reason`.
+
+Use `diff-snapshots` to compare two historical snapshots and detect regressions.
+
+See `benchmarks/README.md` for the full manifest format and private-manifest workflow.
 
 ## Output Contract
 

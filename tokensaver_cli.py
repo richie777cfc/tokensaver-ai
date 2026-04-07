@@ -7,7 +7,8 @@ Usage:
   python tokensaver_cli.py build <path> [--output-dir <dir>]
   python tokensaver_cli.py metrics <path> [--output-dir <dir>]
   python tokensaver_cli.py benchmark <path> [--output-dir <dir>]
-  python tokensaver_cli.py benchmark-suite <manifest.json> [--output-dir <dir>]
+  python tokensaver_cli.py benchmark-suite <manifest.json> [--output-dir <dir>] [--previous <snapshot.json>]
+  python tokensaver_cli.py diff-snapshots <old.json> <new.json>
 """
 
 from __future__ import annotations
@@ -19,7 +20,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from tokensaver.build import OUTPUT_DIRNAME, build_project
-from tokensaver.benchmark import benchmark_project, benchmark_suite
+from tokensaver.benchmark import (
+    benchmark_project,
+    benchmark_suite,
+    diff_snapshots,
+)
 from tokensaver.eval import load_metrics, print_metrics
 from tokensaver.scanner import scan_project
 
@@ -107,28 +112,119 @@ def cmd_benchmark(project_path: str, output_dir: str | None = None):
     return result
 
 
-def cmd_benchmark_suite(manifest_path: str, output_dir: str | None = None):
-    """Run a benchmark suite from a manifest and persist SUITE_RESULTS.json."""
-    result = benchmark_suite(manifest_path, output_root=output_dir)
+def cmd_benchmark_suite(
+    manifest_path: str,
+    output_dir: str | None = None,
+    previous: str | None = None,
+):
+    """Run a benchmark suite from a manifest and persist suite outputs."""
+    result = benchmark_suite(
+        manifest_path,
+        output_root=output_dir,
+        previous_snapshot_path=previous,
+    )
     suite = result["suite_results"]
+    summary = suite.get("summary", {})
 
-    print(f"\nBenchmark suite:   {suite['suite']}")
+    print(f"\n{'=' * 60}")
+    print(f"Benchmark suite:   {suite['suite']}")
+    print(f"{'=' * 60}\n")
+
     print(f"Manifest:          {result['manifest']}")
-    print(f"Results output:    {result['suite_path']}\n")
+    print(f"Results:           {result['suite_path']}")
+    print(f"Public results:    {result['public_path']}")
+    print(f"Markdown:          {result['md_path']}")
+    print(f"Snapshot:          {result['snapshot_path']}\n")
 
-    print(f"{'Benchmark':<28} {'Framework':<15} {'Runtime':>8} {'Ratio':>10}")
-    print(f"{'-' * 28} {'-' * 15} {'-' * 8} {'-' * 10}")
+    print(f"Benchmarks:  {summary.get('benchmark_count', 0)}")
+    print(f"Succeeded:   {summary.get('success_count', 0)}")
+    print(f"Failed:      {summary.get('failed_count', 0)}")
+    print(f"Unsupported: {summary.get('unsupported_count', 0)}")
+    print(f"Partial:     {summary.get('partial_count', 0)}")
+    print(f"Success rate: {summary.get('success_rate', 0):.1%}\n")
+
+    fda = summary.get("framework_detection_accuracy")
+    if fda is not None:
+        print(f"Framework detection accuracy: {fda:.1%}")
+
+    print(f"\n{'Label':<28} {'Framework':<15} {'Status':<12} {'Runtime':>8} {'Ratio':>10}")
+    print(f"{'-' * 28} {'-' * 15} {'-' * 12} {'-' * 8} {'-' * 10}")
     for item in suite["results"]:
-        repo_ratio = item["repo"]["compression_ratio"]
+        repo_ratio = item.get("repo", {}).get("compression_ratio")
         ratio_text = f"{repo_ratio:.2f}x" if repo_ratio else "n/a"
+        rt = f"{item['runtime_seconds']:.2f}s" if item.get("runtime_seconds") else "n/a"
+        fw = item.get("detected_framework") or ""
         print(
-            f"{item['label']:<28} "
-            f"{item['framework']:<15} "
-            f"{item['runtime_seconds']:>7.2f}s "
+            f"{item.get('publish_label', item.get('label', item['id'])):<28} "
+            f"{fw:<15} "
+            f"{item['status']:<12} "
+            f"{rt:>8} "
             f"{ratio_text:>10}"
         )
+
+    failures = [r for r in suite["results"] if r["status"] in {"failed", "partial"}]
+    if failures:
+        print(f"\nFailures / Partial:")
+        for f in failures:
+            reason = f.get("failure_reason") or "partial artifacts"
+            label = f.get("publish_label") if f.get("private") else f.get("label", f["id"])
+            print(f"  {label}: {reason}")
+
+    if previous:
+        print(f"\nComparing against previous snapshot: {previous}")
+        try:
+            diff = diff_snapshots(previous, result["suite_path"])
+            _print_diff(diff)
+        except Exception as exc:
+            print(f"  Error comparing snapshots: {exc}")
+
     print()
     return result
+
+
+def cmd_diff_snapshots(old_path: str, new_path: str):
+    """Compare two suite snapshots and print a regression report."""
+    diff = diff_snapshots(old_path, new_path)
+
+    print(f"\n{'=' * 60}")
+    print("Snapshot Diff Report")
+    print(f"{'=' * 60}\n")
+
+    _print_diff(diff)
+    return diff
+
+
+def _print_diff(diff: dict):
+    """Print diff results to stdout."""
+    if diff.get("new_failures"):
+        print(f"\nNew failures ({len(diff['new_failures'])}):")
+        for f in diff["new_failures"]:
+            print(f"  {f.get('label', f['id'])}: {f.get('failure_reason', 'unknown')}")
+
+    if diff.get("fixed_failures"):
+        print(f"\nFixed failures ({len(diff['fixed_failures'])}):")
+        for f in diff["fixed_failures"]:
+            print(f"  {f.get('label', f['id'])}: now {f.get('new_status', 'ok')}")
+
+    if diff.get("compression_ratio_delta"):
+        print(f"\nCompression ratio changes:")
+        for rid, d in sorted(diff["compression_ratio_delta"].items(), key=lambda x: x[1]["delta"]):
+            label = d.get("label", rid)
+            print(f"  {label}: {d['old']:.2f}x -> {d['new']:.2f}x ({d['delta']:+.2f})")
+
+    if diff.get("runtime_delta"):
+        print(f"\nRuntime changes:")
+        for rid, d in sorted(diff["runtime_delta"].items(), key=lambda x: x[1]["delta"]):
+            label = d.get("label", rid)
+            print(f"  {label}: {d['old']:.2f}s -> {d['new']:.2f}s ({d['delta']:+.2f}s)")
+
+    if diff.get("framework_detection_changes"):
+        print(f"\nFramework detection changes:")
+        for c in diff["framework_detection_changes"]:
+            print(f"  {c.get('label', c['id'])}: {c['old']} -> {c['new']}")
+
+    if not any(diff.get(k) for k in ("new_failures", "fixed_failures", "compression_ratio_delta", "runtime_delta", "framework_detection_changes")):
+        print("  No significant changes detected.")
 
 
 def _parse_output_dir(argv: list[str]) -> str | None:
@@ -141,6 +237,16 @@ def _parse_output_dir(argv: list[str]) -> str | None:
     return argv[index + 1]
 
 
+def _parse_flag(argv: list[str], flag: str) -> str | None:
+    if flag not in argv:
+        return None
+    index = argv.index(flag)
+    if index + 1 >= len(argv):
+        print(f"Error: {flag} requires a value")
+        sys.exit(1)
+    return argv[index + 1]
+
+
 def main():
     if len(sys.argv) < 3:
         print(__doc__)
@@ -148,7 +254,8 @@ def main():
 
     command = sys.argv[1]
     target = sys.argv[2]
-    output_dir = _parse_output_dir(sys.argv[3:])
+    remaining = sys.argv[3:]
+    output_dir = _parse_output_dir(remaining)
 
     if command == "scan":
         if not os.path.isdir(target):
@@ -174,7 +281,14 @@ def main():
         if not os.path.isfile(target):
             print(f"Error: {target} is not a file")
             sys.exit(1)
-        cmd_benchmark_suite(target, output_dir=output_dir)
+        previous = _parse_flag(remaining, "--previous")
+        cmd_benchmark_suite(target, output_dir=output_dir, previous=previous)
+    elif command == "diff-snapshots":
+        if len(sys.argv) < 4:
+            print("Usage: python tokensaver_cli.py diff-snapshots <old.json> <new.json>")
+            sys.exit(1)
+        new_target = sys.argv[3]
+        cmd_diff_snapshots(target, new_target)
     else:
         print(f"Unknown command: {command}")
         print(__doc__)
