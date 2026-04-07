@@ -5,7 +5,7 @@
 ```bash
 pip install --no-build-isolation .
 tokensaver build .
-# Done. 50x+ compression. Zero config.
+# Done. Exact metrics. Stable schema. Agent-ready context.
 ```
 
 TokenSaver scans your codebase, extracts the structural facts that coding agents actually need (modules, APIs, routes, config, commands), and compresses them into 7 compact JSON artifacts. Agents read **thousands** of tokens instead of **hundreds of thousands**.
@@ -19,16 +19,16 @@ TokenSaver scans your codebase, extracts the structural facts that coding agents
 | Agent reads 800K tokens of raw source | Agent reads ~15K tokens of structured context |
 | Every prompt re-parses the entire codebase | Artifacts are pre-built, cached, and incremental |
 | No awareness of project structure | Module graph, API index, route map, config keys |
-| Context window fills up fast | 20-80x compression ratio, measured with `tiktoken` |
+| Context window fills up fast | Exact per-artifact and repo-level compression metrics |
 
-**Real-world benchmark** (Flutter app, 460K source tokens):
+**Published real-world benchmarks** (anonymized, exact `tiktoken` counts):
 
-| Metric | Value |
+| Repo | Framework | Source tokens | Bundle tokens | Compression |
 |---|---|
-| Source tokens | 460,244 |
-| Bundle tokens | 8,537 |
-| **Compression ratio** | **53.91x** |
-| Build time | < 2s |
+| Confidential Flutter App A | `flutter` | 8,510,170 covered-set tokens | 157,466 | **54.04x** |
+| Confidential React Native App B | `react_native` | 804,476 covered-set tokens | 28,394 | **28.33x** |
+
+Public fixture benchmarks are used for contract validation and support coverage, not headline compression claims.
 
 ---
 
