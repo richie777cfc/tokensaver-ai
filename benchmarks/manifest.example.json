@@ -1,0 +1,16 @@
+{
+  "name": "local-benchmark-suite",
+  "output_root": "./output/benchmark-suite",
+  "benchmarks": [
+    {
+      "id": "flutter-app",
+      "label": "Local Flutter App",
+      "root": "/absolute/path/to/flutter-app"
+    },
+    {
+      "id": "react-native-app",
+      "label": "Local React Native App",
+      "root": "/absolute/path/to/react-native-app"
+    }
+  ]
+}

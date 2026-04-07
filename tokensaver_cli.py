@@ -7,6 +7,7 @@ Usage:
   python tokensaver_cli.py build <path> [--output-dir <dir>]
   python tokensaver_cli.py metrics <path> [--output-dir <dir>]
   python tokensaver_cli.py benchmark <path> [--output-dir <dir>]
+  python tokensaver_cli.py benchmark-suite <manifest.json> [--output-dir <dir>]
 """
 
 from __future__ import annotations
@@ -18,7 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from tokensaver.build import OUTPUT_DIRNAME, build_project
-from tokensaver.benchmark import benchmark_project
+from tokensaver.benchmark import benchmark_project, benchmark_suite
 from tokensaver.eval import load_metrics, print_metrics
 from tokensaver.scanner import scan_project
 
@@ -106,6 +107,30 @@ def cmd_benchmark(project_path: str, output_dir: str | None = None):
     return result
 
 
+def cmd_benchmark_suite(manifest_path: str, output_dir: str | None = None):
+    """Run a benchmark suite from a manifest and persist SUITE_RESULTS.json."""
+    result = benchmark_suite(manifest_path, output_root=output_dir)
+    suite = result["suite_results"]
+
+    print(f"\nBenchmark suite:   {suite['suite']}")
+    print(f"Manifest:          {result['manifest']}")
+    print(f"Results output:    {result['suite_path']}\n")
+
+    print(f"{'Benchmark':<28} {'Framework':<15} {'Runtime':>8} {'Ratio':>10}")
+    print(f"{'-' * 28} {'-' * 15} {'-' * 8} {'-' * 10}")
+    for item in suite["results"]:
+        repo_ratio = item["repo"]["compression_ratio"]
+        ratio_text = f"{repo_ratio:.2f}x" if repo_ratio else "n/a"
+        print(
+            f"{item['label']:<28} "
+            f"{item['framework']:<15} "
+            f"{item['runtime_seconds']:>7.2f}s "
+            f"{ratio_text:>10}"
+        )
+    print()
+    return result
+
+
 def _parse_output_dir(argv: list[str]) -> str | None:
     if "--output-dir" not in argv:
         return None
@@ -122,21 +147,34 @@ def main():
         sys.exit(1)
 
     command = sys.argv[1]
-    project_path = sys.argv[2]
+    target = sys.argv[2]
     output_dir = _parse_output_dir(sys.argv[3:])
 
-    if not os.path.isdir(project_path):
-        print(f"Error: {project_path} is not a directory")
-        sys.exit(1)
-
     if command == "scan":
-        cmd_scan(project_path)
+        if not os.path.isdir(target):
+            print(f"Error: {target} is not a directory")
+            sys.exit(1)
+        cmd_scan(target)
     elif command in {"build", "generate"}:
-        cmd_build(project_path, output_dir=output_dir)
+        if not os.path.isdir(target):
+            print(f"Error: {target} is not a directory")
+            sys.exit(1)
+        cmd_build(target, output_dir=output_dir)
     elif command in {"metrics", "eval"}:
-        cmd_metrics(project_path, output_dir=output_dir)
+        if not os.path.isdir(target):
+            print(f"Error: {target} is not a directory")
+            sys.exit(1)
+        cmd_metrics(target, output_dir=output_dir)
     elif command == "benchmark":
-        cmd_benchmark(project_path, output_dir=output_dir)
+        if not os.path.isdir(target):
+            print(f"Error: {target} is not a directory")
+            sys.exit(1)
+        cmd_benchmark(target, output_dir=output_dir)
+    elif command == "benchmark-suite":
+        if not os.path.isfile(target):
+            print(f"Error: {target} is not a file")
+            sys.exit(1)
+        cmd_benchmark_suite(target, output_dir=output_dir)
     else:
         print(f"Unknown command: {command}")
         print(__doc__)

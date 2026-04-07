@@ -25,6 +25,7 @@ python3 tokensaver_cli.py scan .
 python3 tokensaver_cli.py build .
 python3 tokensaver_cli.py metrics .
 python3 tokensaver_cli.py benchmark .
+python3 tokensaver_cli.py benchmark-suite benchmarks/manifest.example.json
 ```
 
 `build` writes these files to `docs/tokensaver/`:
@@ -59,6 +60,7 @@ TokenSaver includes a reproducible `benchmark` command for cross-repo validation
 - records runtime, framework, selected plugin, exact scan totals, and compression metrics
 
 Committed benchmark snapshots live in `benchmarks/results.json` and `benchmarks/results.md`.
+Suite manifests can be defined with `benchmarks/manifest.example.json`.
 
 Current published results:
 
