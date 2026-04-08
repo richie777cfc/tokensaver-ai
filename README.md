@@ -49,6 +49,12 @@ These are exact measured results from 11 anonymized real-world repositories acro
 python3 -m pip install --user tokensaver-ai
 ```
 
+If `tokensaver` is not found after install, add your user Python bin directory to `PATH`:
+
+```bash
+export PATH="$(python3 -m site --user-base)/bin:$PATH"
+```
+
 ### Add to any repo
 
 ```bash
