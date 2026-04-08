@@ -1,6 +1,6 @@
 # TokenSaver
 
-**Compile any repository into minimal agent context — with exact token compression metrics.**
+**Give coding agents a compressed map of your repo before they read your code.**
 
 ```bash
 python3 -m pip install --user tokensaver-ai
@@ -8,11 +8,15 @@ cd /path/to/your-repo
 tokensaver init .
 ```
 
-TokenSaver scans your codebase, extracts the structural facts that coding agents actually need (modules, APIs, routes, config, commands), and compresses them into 7 compact JSON artifacts. Agents read **thousands** of tokens instead of **hundreds of thousands**.
+TokenSaver turns large repositories into compact, agent-ready context bundles. It extracts the structural facts coding agents actually need, installs agent rules automatically, and measures exact token compression so you can see the impact.
+
+Works with **Cursor**, **Claude Code**, **Codex**, **Windsurf**, and **MCP**.
 
 ---
 
 ## Why TokenSaver?
+
+TokenSaver helps agents start with structure instead of raw source:
 
 | Without TokenSaver | With TokenSaver |
 |---|---|
@@ -20,6 +24,8 @@ TokenSaver scans your codebase, extracts the structural facts that coding agents
 | Every prompt re-parses the entire codebase | Artifacts are pre-built, cached, and incremental |
 | No awareness of project structure | Module graph, API index, route map, config keys |
 | Context window fills up fast | Exact per-artifact and repo-level compression metrics |
+
+**Real-world proof:** up to **77.15x** measured compression across 11 anonymized real-world repositories and 13/13 public fixtures passing with 100% framework detection.
 
 **Published real-world benchmarks** (anonymized, exact `tiktoken` counts):
 
@@ -43,7 +49,7 @@ These are exact measured results from 11 anonymized real-world repositories acro
 
 ## Quick Start
 
-### Install once
+### Standard install
 
 ```bash
 python3 -m pip install --user tokensaver-ai
@@ -55,6 +61,14 @@ If `tokensaver` is not found after install, add your user Python bin directory t
 export PATH="$(python3 -m site --user-base)/bin:$PATH"
 ```
 
+### Install with MCP support
+
+```bash
+python3 -m pip install --user "tokensaver-ai[mcp]"
+```
+
+With the MCP extra installed, `tokensaver init .` also writes Cursor and Claude MCP configs automatically.
+
 ### Add to any repo
 
 ```bash
@@ -62,7 +76,12 @@ cd /path/to/your-repo
 tokensaver init .
 ```
 
-This builds the TokenSaver bundle, writes agent integration files, and prints the repo’s compression summary in one step.
+This one command:
+
+- builds the TokenSaver bundle
+- writes Cursor, Claude Code, Codex, and Windsurf rule files
+- writes Cursor and Claude MCP configs when MCP support is installed
+- prints the repo’s compression summary
 
 ### Scan
 
@@ -102,9 +121,11 @@ tokensaver impact /path/to/repo --files src/auth/login.py,src/models/user.py
 ### MCP Server
 
 ```bash
-pip install --no-build-isolation ".[mcp]"
+python3 -m pip install --user "tokensaver-ai[mcp]"
+cd /path/to/repo
+tokensaver init .
 tokensaver serve /path/to/repo
-# Starts MCP server — agents can query modules, APIs, routes interactively
+# Starts the TokenSaver MCP server for interactive querying
 ```
 
 ---

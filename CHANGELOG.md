@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.2
+
+- Rewrote the README top section to be more product-focused and easier to scan
+- Added a first-class MCP install path using `tokensaver-ai[mcp]`
+- Clarified that `tokensaver init .` installs Cursor, Claude Code, Codex, Windsurf, and MCP integrations where available
+- Updated the PyPI long description to match the new onboarding flow
+
 ## 1.2.1
 
 - Renamed the PyPI distribution to `tokensaver-ai` while keeping the CLI command as `tokensaver`
