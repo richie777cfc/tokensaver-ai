@@ -4,6 +4,7 @@ TokenSaver CLI — Compile repositories into minimal agent context.
 
 Usage:
   tokensaver scan <path>
+  tokensaver init <path> [--output-dir <dir>] [--force]
   tokensaver build <path> [--output-dir <dir>] [--force]
   tokensaver impact <path> [--output-dir <dir>] [--files file1,file2,...]
   tokensaver serve <path> [--output-dir <dir>]
@@ -104,6 +105,57 @@ def cmd_build(project_path: str, output_dir: str | None = None, *, force: bool =
 
     print()
     print_metrics(metrics)
+    return result
+
+
+def cmd_init(project_path: str, output_dir: str | None = None, *, force: bool = False):
+    """One-shot repo onboarding: build artifacts and install agent integrations."""
+    result = build_project(project_path, output_dir=output_dir, force=force)
+    scan = result["scan"]
+    metrics = result["metrics"]
+    integrations = result.get("integrations", {})
+    rebuilt = result.get("rebuilt", [])
+    skipped = result.get("skipped", [])
+
+    print(f"\n{'=' * 60}")
+    print(f"TokenSaver Init:    {scan.project_name}")
+    print(f"{'=' * 60}\n")
+
+    print(f"Repo:              {Path(project_path).resolve()}")
+    print(f"Framework:         {scan.framework}")
+    print(f"Plugin:            {result['plugin']}")
+    print(f"Artifacts:         {result['output_dir']}")
+    print(f"Compression:       {metrics['repo']['compression_ratio']:.2f}x")
+    print(f"Union tokens:      {metrics['repo']['union_source_tokens']:,}")
+    print(f"Bundle tokens:     {metrics['repo']['bundle_tokens']:,}")
+
+    if rebuilt or skipped:
+        print(f"\nArtifacts:")
+        if rebuilt:
+            print(f"  rebuilt:         {', '.join(sorted(rebuilt))}")
+        if skipped:
+            print(f"  cached:          {', '.join(sorted(skipped))}")
+
+    if integrations:
+        print(f"\nInstalled integrations:")
+        labels = {
+            "cursor": "Cursor",
+            "claude": "Claude Code",
+            "codex": "Codex",
+            "cursor_mcp": "Cursor MCP",
+            "claude_mcp": "Claude MCP",
+            "windsurf": "Windsurf",
+        }
+        for key, path in integrations.items():
+            print(f"  {labels.get(key, key):<14} {path}")
+
+    print(f"\nNext steps:")
+    print(f"  1. Open your agent/IDE in this repo.")
+    print(f"  2. Ask architecture/API/navigation questions from the generated bundle first.")
+    print(f"  3. Re-run `tokensaver build {project_path}` after meaningful code changes.")
+    print(f"  4. Run `tokensaver impact {project_path}` to inspect change blast radius.")
+
+    print()
     return result
 
 
@@ -344,6 +396,12 @@ def main():
             print(f"Error: {target} is not a directory")
             sys.exit(1)
         cmd_scan(target)
+    elif command == "init":
+        if not os.path.isdir(target):
+            print(f"Error: {target} is not a directory")
+            sys.exit(1)
+        force = "--force" in remaining
+        cmd_init(target, output_dir=output_dir, force=force)
     elif command in {"build", "generate"}:
         if not os.path.isdir(target):
             print(f"Error: {target} is not a directory")

@@ -3,9 +3,9 @@
 **Compile any repository into minimal agent context — with exact token compression metrics.**
 
 ```bash
-pip install --no-build-isolation .
-tokensaver build .
-# Done. Exact metrics. Stable schema. Agent-ready context.
+python3 -m pip install --user --no-build-isolation "git+https://github.com/richie777cfc/tokensaver.git"
+cd /path/to/your-repo
+tokensaver init .
 ```
 
 TokenSaver scans your codebase, extracts the structural facts that coding agents actually need (modules, APIs, routes, config, commands), and compresses them into 7 compact JSON artifacts. Agents read **thousands** of tokens instead of **hundreds of thousands**.
@@ -43,13 +43,20 @@ These are exact measured results from 11 anonymized real-world repositories acro
 
 ## Quick Start
 
-### Install from source
+### Install once
 
 ```bash
-git clone https://github.com/richie777cfc/tokensaver.git
-cd tokensaver
-pip install --no-build-isolation .
+python3 -m pip install --user --no-build-isolation "git+https://github.com/richie777cfc/tokensaver.git"
 ```
+
+### Add to any repo
+
+```bash
+cd /path/to/your-repo
+tokensaver init .
+```
+
+This builds the TokenSaver bundle, writes agent integration files, and prints the repo’s compression summary in one step.
 
 ### Scan
 
@@ -217,6 +224,7 @@ tokensaver_cli.py    # CLI entry point
 
 ```bash
 tokensaver scan <path>                                    # Scan and report token counts
+tokensaver init <path> [--output-dir <dir>] [--force]     # One-shot repo onboarding
 tokensaver build <path> [--output-dir <dir>] [--force]    # Build artifacts
 tokensaver impact <path> [--files f1,f2]                  # Blast-radius analysis
 tokensaver serve <path>                                   # Start MCP server
