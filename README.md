@@ -12,6 +12,48 @@ Works with **Cursor**, **Claude Code**, **Codex**, **Windsurf**, and **MCP-enabl
 
 ---
 
+## Who It’s For
+
+TokenSaver is for teams using coding agents on repositories that are too large, too modular, or too repetitive to keep re-reading from scratch.
+
+It helps most when you have:
+
+- large monorepos or multi-module apps
+- mobile + web + backend repositories
+- repeated agent sessions in the same codebase
+- architecture, API, navigation, or config questions
+- agents that keep spending context on repo discovery before doing useful work
+
+## When TokenSaver Helps Most
+
+TokenSaver is most useful when the hard part is **understanding the repo**, not writing one isolated function.
+
+Typical cases:
+
+- onboarding to an unfamiliar codebase
+- answering "where does this live?" or "how is this wired?"
+- tracing APIs, routes, modules, and config
+- keeping agent context stable across multiple tasks
+- reducing repeated raw-source reads in long sessions
+
+## Why Not Just Let the Agent Read the Repo?
+
+You can. But on larger repositories, that gets expensive and noisy fast.
+
+Without TokenSaver:
+
+- agents repeatedly crawl raw source to rediscover structure
+- context gets wasted on files that are not immediately relevant
+- answers can vary across sessions depending on what was read first
+- large codebases take longer to orient around before real work begins
+
+With TokenSaver:
+
+- agents start with a compact map of the repo
+- architecture, API, route, and config questions are easier to answer from artifacts first
+- raw source is read only when implementation detail is actually needed
+- token usage becomes measurable instead of guesswork
+
 ## Why TokenSaver?
 
 TokenSaver helps agents start with structure instead of raw source:
@@ -80,6 +122,32 @@ This one command:
 - writes Cursor, Claude Code, Codex, and Windsurf rule files
 - writes Cursor and Claude MCP configs when MCP support is installed
 - prints the repo’s compression summary
+
+## How Agents Use It
+
+Instead of opening raw source first, agents can start from the generated bundle:
+
+- `PROJECT_SUMMARY.json` for framework, entrypoints, and project shape
+- `COMMANDS.json` for run, build, test, and lint commands
+- `MODULE_GRAPH.json` for structure and dependencies
+- `API_INDEX.json` for endpoints and services
+- `ROUTE_INDEX.json` for navigation and pages
+- `CONFIG_INDEX.json` for env/config keys
+- `METRICS.json` for exact compression numbers
+
+That means agents begin with structure first, then drill into source only when necessary.
+
+## Before and After
+
+Without TokenSaver:
+
+- agent opens many files just to answer "how does this repo work?"
+
+With TokenSaver:
+
+- agent reads the bundle first
+- finds the relevant module, route, API, or config quickly
+- opens only the few source files needed for implementation detail
 
 ### Scan
 
