@@ -97,15 +97,48 @@ For running benchmarks against private local repos:
 
 1. Create `benchmarks/local/manifest.private.json` (this path is gitignored)
 2. Set `private: true` for entries with confidential repo names
-3. Use `publish_label` for safe public-facing names
-4. Run: `python3 tokensaver_cli.py benchmark-suite benchmarks/local/manifest.private.json`
-5. The `benchmarks/local/` directory is entirely gitignored — private manifests and raw outputs are never committed
+3. Use `publish_label` for safe public-facing names (e.g., "Confidential Flutter App A")
+4. Use safe `id` values that do not reveal repo names (e.g., `flutter-app-a`)
+5. Run: `python3 tokensaver_cli.py benchmark-suite benchmarks/local/manifest.private.json`
+6. The `benchmarks/local/` directory is entirely gitignored — private manifests and raw outputs are never committed
+
+### Publishing Sanitized Results
+
+To update the tracked public benchmark summaries from a private suite run:
+
+1. Run the private suite: `python3 tokensaver_cli.py benchmark-suite benchmarks/local/manifest.private.json`
+2. Review raw results in `benchmarks/local/output/SUITE_RESULTS.json`
+3. Select representative repos — prefer those with `ok` status and meaningful coverage
+4. Manually copy only anonymized metrics into `benchmarks/results.json` and `benchmarks/results.md`
+5. Use only `publish_label` names — never real repo names, paths, or identifiers
+6. Run the leak scan: `python3 scripts/release_smoke.py`
+
+### What Must Never Be Committed
+
+- `benchmarks/local/manifest.private.json` (contains absolute paths to private repos)
+- `benchmarks/local/output/` (contains raw benchmark outputs with local paths)
+- `benchmarks/local/leak_patterns.private.txt` (contains confidential project names)
+- Any file containing real repo names, local paths, or machine-specific directories
+
+### Leak Pattern File
+
+Create `benchmarks/local/leak_patterns.private.txt` with one pattern per line. The release smoke test (`scripts/release_smoke.py`) scans all tracked files for these substrings before allowing a release. Patterns should include:
+
+- Machine-specific path prefixes (e.g., `/Users/username`)
+- Confidential project names used in the private manifest
+- Organization-specific identifiers
+
+Lines starting with `#` are treated as comments.
 
 ## Tracked Snapshots
 
-Published benchmark snapshots in `benchmarks/results.json` and `benchmarks/results.md` contain only anonymized data. Do not add confidential repo names or local paths to these files.
+Published benchmark snapshots in `benchmarks/results.json` and `benchmarks/results.md` contain only anonymized data from selected real-world repos. These files must never contain:
 
-The repository also includes public benchmark fixtures under `benchmarks/fixtures/` for CI and smoke testing. These fixtures are synthetic and safe to publish.
+- Real repo names or project identifiers
+- Local paths or usernames
+- Machine-specific directories
+
+The repository also includes public benchmark fixtures under `benchmarks/fixtures/` for CI and smoke testing. These fixtures are synthetic and safe to publish. Fixture results validate framework detection and artifact generation — they are not used for headline compression claims.
 
 ## Snapshot History and Diffing
 

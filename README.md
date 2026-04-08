@@ -23,12 +23,18 @@ TokenSaver scans your codebase, extracts the structural facts that coding agents
 
 **Published real-world benchmarks** (anonymized, exact `tiktoken` counts):
 
-| Repo | Framework | Source tokens | Bundle tokens | Compression |
-|---|---|
-| Confidential Flutter App A | `flutter` | 8,510,170 covered-set tokens | 157,466 | **54.04x** |
-| Confidential React Native App B | `react_native` | 804,476 covered-set tokens | 28,394 | **28.33x** |
+| Repo | Framework | Plugin | Files | Source Tokens | Bundle Tokens | Compression |
+|---|---|---|---:|---:|---:|---:|
+| Confidential Flutter App A | `flutter` | `flutter` | 10,264 | 8,510,170 | 157,867 | **53.91x** |
+| Confidential Flutter App B | `flutter` | `flutter` | 105 | 222,337 | 2,882 | **77.15x** |
+| Confidential React Native App A | `react_native` | `react_native` | 896 | 804,476 | 28,466 | **28.26x** |
+| Confidential React Native App B | `react_native` | `react_native` | 570 | 71,748 | 5,063 | **14.17x** |
+| Confidential Node Backend A | `node` | `generic` | 32 | 19,998 | 5,498 | **3.64x** |
+| Confidential Next.js App A | `nextjs` | `nextjs` | 59 | 18,747 | 1,999 | **9.38x** |
+| Confidential Android App A | `android_native` | `android_native` | 2,255 | 4,427,242 | 2,180,896 | **2.03x** |
+| Confidential iOS App A | `ios_swift` | `ios_swift` | 2,449 | 5,903,230 | 84,544 | **69.82x** |
 
-Public fixture benchmarks are used for contract validation and support coverage, not headline compression claims.
+These are exact measured results from 8 anonymized real-world repositories across 6 frameworks. Compression ratios vary by project structure and framework. Public fixture benchmarks are used for contract validation and support coverage, not headline compression claims. See [Published Results](benchmarks/results.md) for per-artifact breakdowns.
 
 ---
 

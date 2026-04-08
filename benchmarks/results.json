@@ -1,7 +1,13 @@
 {
   "_meta": {
     "generated_at": "2026-04-07",
-    "description": "Published benchmark snapshots with exact TokenSaver compression metrics.",
+    "description": "Published benchmark snapshots with exact TokenSaver compression metrics. Real-world private repos, anonymized. Public fixture suite results are tracked separately in CI.",
+    "summary_notes": {
+      "files_column": "Uses full repo scan file counts.",
+      "source_tokens_column": "Uses repo.union_source_tokens from the artifact covered-set union.",
+      "compression_column": "Uses repo.union_source_tokens / repo.bundle_tokens.",
+      "covered_set_note": "Covered-set union totals may differ from full scan totals because artifact source accounting follows extractor source sets rather than the top-level scan summary."
+    },
     "tokenizer": "o200k_base"
   },
   "benchmarks": [
@@ -10,7 +16,7 @@
       "display_name": "Confidential Flutter App A",
       "framework": "flutter",
       "plugin": "flutter",
-      "runtime_seconds": 55.53,
+      "runtime_seconds": 47.75,
       "scan": {
         "total_files": 10264,
         "total_tokens": 16067711
@@ -18,35 +24,110 @@
       "repo": {
         "source_file_count": 5445,
         "union_source_tokens": 8510170,
-        "bundle_tokens": 157466,
-        "compression_ratio": 54.04449214433592,
-        "overlap_source_tokens": 1456590
+        "bundle_tokens": 157867,
+        "compression_ratio": 53.91,
+        "overlap_source_tokens": 1458872
       },
       "artifacts": {
         "project_summary": {
           "source_tokens": 7213,
-          "output_tokens": 999,
-          "compression_ratio": 7.22022022022022
+          "output_tokens": 1011,
+          "compression_ratio": 7.13
         },
         "module_graph": {
           "source_tokens": 8502957,
-          "output_tokens": 98412,
-          "compression_ratio": 86.40162785026216
+          "output_tokens": 98424,
+          "compression_ratio": 86.39
         },
         "api_index": {
           "source_tokens": 76946,
-          "output_tokens": 27454,
-          "compression_ratio": 2.8027245574415387
+          "output_tokens": 27466,
+          "compression_ratio": 2.80
         },
         "route_index": {
           "source_tokens": 1231871,
-          "output_tokens": 23891,
-          "compression_ratio": 51.5621363693441
+          "output_tokens": 23903,
+          "compression_ratio": 51.54
         },
         "config_index": {
           "source_tokens": 147773,
-          "output_tokens": 6657,
-          "compression_ratio": 22.198137299083673
+          "output_tokens": 6669,
+          "compression_ratio": 22.16
+        }
+      }
+    },
+    {
+      "project": "confidential_flutter_app_b",
+      "display_name": "Confidential Flutter App B",
+      "framework": "flutter",
+      "plugin": "flutter",
+      "runtime_seconds": 1.05,
+      "scan": {
+        "total_files": 105,
+        "total_tokens": 262077
+      },
+      "repo": {
+        "source_file_count": 66,
+        "union_source_tokens": 222337,
+        "bundle_tokens": 2882,
+        "compression_ratio": 77.15,
+        "overlap_source_tokens": 1625
+      },
+      "artifacts": {
+        "project_summary": {
+          "source_tokens": 4325,
+          "output_tokens": 1059,
+          "compression_ratio": 4.08
+        },
+        "module_graph": {
+          "source_tokens": 215055,
+          "output_tokens": 1096,
+          "compression_ratio": 196.22
+        },
+        "api_index": {
+          "source_tokens": 2957,
+          "output_tokens": 158,
+          "compression_ratio": 18.72
+        }
+      }
+    },
+    {
+      "project": "confidential_react_native_app_a",
+      "display_name": "Confidential React Native App A",
+      "framework": "react_native",
+      "plugin": "react_native",
+      "runtime_seconds": 14.35,
+      "scan": {
+        "total_files": 896,
+        "total_tokens": 806286
+      },
+      "repo": {
+        "source_file_count": 885,
+        "union_source_tokens": 804476,
+        "bundle_tokens": 28466,
+        "compression_ratio": 28.26,
+        "overlap_source_tokens": 358707
+      },
+      "artifacts": {
+        "project_summary": {
+          "source_tokens": 4070,
+          "output_tokens": 741,
+          "compression_ratio": 5.49
+        },
+        "module_graph": {
+          "source_tokens": 800406,
+          "output_tokens": 14941,
+          "compression_ratio": 53.57
+        },
+        "api_index": {
+          "source_tokens": 180115,
+          "output_tokens": 6789,
+          "compression_ratio": 26.53
+        },
+        "route_index": {
+          "source_tokens": 176829,
+          "output_tokens": 4271,
+          "compression_ratio": 41.40
         }
       }
     },
@@ -55,48 +136,198 @@
       "display_name": "Confidential React Native App B",
       "framework": "react_native",
       "plugin": "react_native",
-      "runtime_seconds": 16.76,
+      "runtime_seconds": 19.68,
       "scan": {
-        "total_files": 896,
-        "total_tokens": 806286
+        "total_files": 570,
+        "total_tokens": 483093
       },
       "repo": {
-        "source_file_count": 885,
-        "union_source_tokens": 804476,
-        "bundle_tokens": 28394,
-        "compression_ratio": 28.332605480030992,
-        "overlap_source_tokens": 358707
+        "source_file_count": 58,
+        "union_source_tokens": 71748,
+        "bundle_tokens": 5063,
+        "compression_ratio": 14.17,
+        "overlap_source_tokens": 2213
       },
       "artifacts": {
         "project_summary": {
-          "source_tokens": 4070,
-          "output_tokens": 729,
-          "compression_ratio": 5.5829903978052124
-        },
-        "commands": {
-          "source_tokens": 1763,
-          "output_tokens": 1643,
-          "compression_ratio": 1.07303712720633
-        },
-        "module_graph": {
-          "source_tokens": 800406,
-          "output_tokens": 14929,
-          "compression_ratio": 53.614173755777344
+          "source_tokens": 3088,
+          "output_tokens": 974,
+          "compression_ratio": 3.17
         },
         "api_index": {
-          "source_tokens": 180115,
-          "output_tokens": 6777,
-          "compression_ratio": 26.577394127194925
+          "source_tokens": 34211,
+          "output_tokens": 2056,
+          "compression_ratio": 16.64
         },
         "route_index": {
-          "source_tokens": 176829,
-          "output_tokens": 4259,
-          "compression_ratio": 41.51890115050481
+          "source_tokens": 33708,
+          "output_tokens": 1170,
+          "compression_ratio": 28.81
         },
         "config_index": {
-          "source_tokens": 0,
-          "output_tokens": 57,
-          "compression_ratio": null
+          "source_tokens": 1211,
+          "output_tokens": 202,
+          "compression_ratio": 5.99
+        }
+      }
+    },
+    {
+      "project": "confidential_node_backend_a",
+      "display_name": "Confidential Node Backend A",
+      "framework": "node",
+      "plugin": "generic",
+      "runtime_seconds": 0.07,
+      "scan": {
+        "total_files": 32,
+        "total_tokens": 21447
+      },
+      "repo": {
+        "source_file_count": 26,
+        "union_source_tokens": 19998,
+        "bundle_tokens": 5498,
+        "compression_ratio": 3.64,
+        "overlap_source_tokens": 8619
+      },
+      "artifacts": {
+        "project_summary": {
+          "source_tokens": 3594,
+          "output_tokens": 630,
+          "compression_ratio": 5.70
+        },
+        "module_graph": {
+          "source_tokens": 15242,
+          "output_tokens": 651,
+          "compression_ratio": 23.41
+        },
+        "api_index": {
+          "source_tokens": 4446,
+          "output_tokens": 513,
+          "compression_ratio": 8.67
+        },
+        "route_index": {
+          "source_tokens": 1500,
+          "output_tokens": 255,
+          "compression_ratio": 5.88
+        },
+        "config_index": {
+          "source_tokens": 3370,
+          "output_tokens": 2472,
+          "compression_ratio": 1.36
+        }
+      }
+    },
+    {
+      "project": "confidential_nextjs_app_a",
+      "display_name": "Confidential Next.js App A",
+      "framework": "nextjs",
+      "plugin": "nextjs",
+      "runtime_seconds": 0.12,
+      "scan": {
+        "total_files": 59,
+        "total_tokens": 92293
+      },
+      "repo": {
+        "source_file_count": 10,
+        "union_source_tokens": 18747,
+        "bundle_tokens": 1999,
+        "compression_ratio": 9.38,
+        "overlap_source_tokens": 16236
+      },
+      "artifacts": {
+        "project_summary": {
+          "source_tokens": 1658,
+          "output_tokens": 478,
+          "compression_ratio": 3.47
+        },
+        "module_graph": {
+          "source_tokens": 15753,
+          "output_tokens": 591,
+          "compression_ratio": 26.65
+        },
+        "route_index": {
+          "source_tokens": 17059,
+          "output_tokens": 360,
+          "compression_ratio": 47.39
+        }
+      }
+    },
+    {
+      "project": "confidential_android_app_a",
+      "display_name": "Confidential Android App A",
+      "framework": "android_native",
+      "plugin": "android_native",
+      "runtime_seconds": 16.31,
+      "scan": {
+        "total_files": 2255,
+        "total_tokens": 3631975
+      },
+      "repo": {
+        "source_file_count": 2290,
+        "union_source_tokens": 4427242,
+        "bundle_tokens": 2180896,
+        "compression_ratio": 2.03,
+        "overlap_source_tokens": 1156573
+      },
+      "artifacts": {
+        "module_graph": {
+          "source_tokens": 3492210,
+          "output_tokens": 131243,
+          "compression_ratio": 26.61
+        },
+        "api_index": {
+          "source_tokens": 640157,
+          "output_tokens": 14971,
+          "compression_ratio": 42.76
+        },
+        "route_index": {
+          "source_tokens": 147190,
+          "output_tokens": 1334,
+          "compression_ratio": 110.34
+        },
+        "config_index": {
+          "source_tokens": 1304211,
+          "output_tokens": 2032781,
+          "compression_ratio": 0.64
+        }
+      }
+    },
+    {
+      "project": "confidential_ios_app_a",
+      "display_name": "Confidential iOS App A",
+      "framework": "ios_swift",
+      "plugin": "ios_swift",
+      "runtime_seconds": 11.43,
+      "scan": {
+        "total_files": 2449,
+        "total_tokens": 5994964
+      },
+      "repo": {
+        "source_file_count": 2389,
+        "union_source_tokens": 5903230,
+        "bundle_tokens": 84544,
+        "compression_ratio": 69.82,
+        "overlap_source_tokens": 541492
+      },
+      "artifacts": {
+        "module_graph": {
+          "source_tokens": 5903221,
+          "output_tokens": 66143,
+          "compression_ratio": 89.25
+        },
+        "api_index": {
+          "source_tokens": 28106,
+          "output_tokens": 1167,
+          "compression_ratio": 24.08
+        },
+        "route_index": {
+          "source_tokens": 287659,
+          "output_tokens": 8539,
+          "compression_ratio": 33.69
+        },
+        "config_index": {
+          "source_tokens": 225727,
+          "output_tokens": 8191,
+          "compression_ratio": 27.56
         }
       }
     }
