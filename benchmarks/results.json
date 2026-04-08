@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "generated_at": "2026-04-07",
+    "generated_at": "2026-04-08",
     "description": "Published benchmark snapshots with exact TokenSaver compression metrics. Real-world private repos, anonymized. Public fixture suite results are tracked separately in CI.",
     "summary_notes": {
       "files_column": "Uses full repo scan file counts.",
@@ -328,6 +328,136 @@
           "source_tokens": 225727,
           "output_tokens": 8191,
           "compression_ratio": 27.56
+        }
+      }
+    },
+    {
+      "project": "confidential_react_web_app_a",
+      "display_name": "Confidential React Web App A",
+      "framework": "react",
+      "plugin": "react_web",
+      "runtime_seconds": 0.33,
+      "scan": {
+        "total_files": 27,
+        "total_tokens": 16593
+      },
+      "repo": {
+        "source_file_count": 24,
+        "union_source_tokens": 16390,
+        "bundle_tokens": 2332,
+        "compression_ratio": 7.03,
+        "overlap_source_tokens": 1845
+      },
+      "artifacts": {
+        "project_summary": {
+          "source_tokens": 644,
+          "output_tokens": 512,
+          "compression_ratio": 1.26
+        },
+        "module_graph": {
+          "source_tokens": 14631,
+          "output_tokens": 595,
+          "compression_ratio": 24.59
+        },
+        "api_index": {
+          "source_tokens": 1442,
+          "output_tokens": 337,
+          "compression_ratio": 4.28
+        },
+        "route_index": {
+          "source_tokens": 895,
+          "output_tokens": 414,
+          "compression_ratio": 2.16
+        }
+      }
+    },
+    {
+      "project": "confidential_angular_app_a",
+      "display_name": "Confidential Angular App A",
+      "framework": "angular",
+      "plugin": "angular",
+      "runtime_seconds": 1.17,
+      "scan": {
+        "total_files": 456,
+        "total_tokens": 255842
+      },
+      "repo": {
+        "source_file_count": 447,
+        "union_source_tokens": 254702,
+        "bundle_tokens": 23379,
+        "compression_ratio": 10.89,
+        "overlap_source_tokens": 141382
+      },
+      "artifacts": {
+        "project_summary": {
+          "source_tokens": 601,
+          "output_tokens": 627,
+          "compression_ratio": 0.96
+        },
+        "module_graph": {
+          "source_tokens": 254101,
+          "output_tokens": 10710,
+          "compression_ratio": 23.73
+        },
+        "api_index": {
+          "source_tokens": 19309,
+          "output_tokens": 5126,
+          "compression_ratio": 3.77
+        },
+        "route_index": {
+          "source_tokens": 120954,
+          "output_tokens": 4654,
+          "compression_ratio": 25.99
+        },
+        "config_index": {
+          "source_tokens": 530,
+          "output_tokens": 1697,
+          "compression_ratio": 0.31
+        }
+      }
+    },
+    {
+      "project": "confidential_angular_app_b",
+      "display_name": "Confidential Angular App B",
+      "framework": "angular",
+      "plugin": "angular",
+      "runtime_seconds": 7.25,
+      "scan": {
+        "total_files": 140,
+        "total_tokens": 112162
+      },
+      "repo": {
+        "source_file_count": 127,
+        "union_source_tokens": 101390,
+        "bundle_tokens": 12850,
+        "compression_ratio": 7.89,
+        "overlap_source_tokens": 50382
+      },
+      "artifacts": {
+        "project_summary": {
+          "source_tokens": 1531,
+          "output_tokens": 692,
+          "compression_ratio": 2.21
+        },
+        "module_graph": {
+          "source_tokens": 99859,
+          "output_tokens": 2095,
+          "compression_ratio": 47.67
+        },
+        "api_index": {
+          "source_tokens": 17943,
+          "output_tokens": 1073,
+          "compression_ratio": 16.72
+        },
+        "route_index": {
+          "source_tokens": 6012,
+          "output_tokens": 748,
+          "compression_ratio": 8.04
+        },
+        "config_index": {
+          "source_tokens": 25494,
+          "output_tokens": 6763,
+          "compression_ratio": 3.77
         }
       }
     }

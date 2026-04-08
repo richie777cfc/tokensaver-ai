@@ -1,6 +1,6 @@
 # Published Results
 
-Benchmark date: April 7, 2026
+Benchmark date: April 8, 2026
 
 These snapshots publish exact TokenSaver benchmark outputs from anonymized real-world repositories. Public fixture suite results are tracked separately in CI — see the fixture suite section in [README.md](../README.md).
 
@@ -18,6 +18,9 @@ These snapshots publish exact TokenSaver benchmark outputs from anonymized real-
 | Confidential Next.js App A | `nextjs` | `nextjs` | 59 | 18,747 | 1,999 | **9.38x** |
 | Confidential Android App A | `android_native` | `android_native` | 2,255 | 4,427,242 | 2,180,896 | **2.03x** |
 | Confidential iOS App A | `ios_swift` | `ios_swift` | 2,449 | 5,903,230 | 84,544 | **69.82x** |
+| Confidential React Web App A | `react` | `react_web` | 27 | 16,390 | 2,332 | **7.03x** |
+| Confidential Angular App A | `angular` | `angular` | 456 | 254,702 | 23,379 | **10.89x** |
+| Confidential Angular App B | `angular` | `angular` | 140 | 101,390 | 12,850 | **7.89x** |
 
 ## Confidential Flutter App A
 
@@ -138,3 +141,50 @@ Artifact ratios:
 - `api_index`: `24.08x`
 - `route_index`: `33.69x`
 - `config_index`: `27.56x`
+
+## Confidential React Web App A
+
+- Framework: `react`
+- Plugin: `react_web`
+- Runtime: `0.33s`
+- Full scan: `27` files, `16,593` tokens
+- Covered-set compression: `16,390 -> 2,332` tokens (`7.03x`)
+
+Artifact ratios:
+
+- `project_summary`: `1.26x`
+- `module_graph`: `24.59x`
+- `api_index`: `4.28x`
+- `route_index`: `2.16x`
+
+## Confidential Angular App A
+
+- Framework: `angular`
+- Plugin: `angular`
+- Runtime: `1.17s`
+- Full scan: `456` files, `255,842` tokens
+- Covered-set compression: `254,702 -> 23,379` tokens (`10.89x`)
+
+Artifact ratios:
+
+- `project_summary`: `0.96x`
+- `module_graph`: `23.73x`
+- `api_index`: `3.77x`
+- `route_index`: `25.99x`
+- `config_index`: `0.31x`
+
+## Confidential Angular App B
+
+- Framework: `angular`
+- Plugin: `angular`
+- Runtime: `7.25s`
+- Full scan: `140` files, `112,162` tokens
+- Covered-set compression: `101,390 -> 12,850` tokens (`7.89x`)
+
+Artifact ratios:
+
+- `project_summary`: `2.21x`
+- `module_graph`: `47.67x`
+- `api_index`: `16.72x`
+- `route_index`: `8.04x`
+- `config_index`: `3.77x`

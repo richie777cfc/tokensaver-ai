@@ -33,8 +33,11 @@ TokenSaver scans your codebase, extracts the structural facts that coding agents
 | Confidential Next.js App A | `nextjs` | `nextjs` | 59 | 18,747 | 1,999 | **9.38x** |
 | Confidential Android App A | `android_native` | `android_native` | 2,255 | 4,427,242 | 2,180,896 | **2.03x** |
 | Confidential iOS App A | `ios_swift` | `ios_swift` | 2,449 | 5,903,230 | 84,544 | **69.82x** |
+| Confidential React Web App A | `react` | `react_web` | 27 | 16,390 | 2,332 | **7.03x** |
+| Confidential Angular App A | `angular` | `angular` | 456 | 254,702 | 23,379 | **10.89x** |
+| Confidential Angular App B | `angular` | `angular` | 140 | 101,390 | 12,850 | **7.89x** |
 
-These are exact measured results from 8 anonymized real-world repositories across 6 frameworks. Compression ratios vary by project structure and framework. Public fixture benchmarks are used for contract validation and support coverage, not headline compression claims. See [Published Results](benchmarks/results.md) for per-artifact breakdowns.
+These are exact measured results from 11 anonymized real-world repositories across 8 frameworks. Compression ratios vary by project structure and framework. Public fixture benchmarks are used for contract validation and support coverage, not headline compression claims. See [Published Results](benchmarks/results.md) for per-artifact breakdowns.
 
 ---
 
