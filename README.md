@@ -3,7 +3,7 @@
 **Compile any repository into minimal agent context — with exact token compression metrics.**
 
 ```bash
-python3 -m pip install --user --no-build-isolation "git+https://github.com/richie777cfc/tokensaver.git"
+python3 -m pip install --user --no-build-isolation "git+https://github.com/richie777cfc/tokensaver-ai.git"
 cd /path/to/your-repo
 tokensaver init .
 ```
@@ -46,7 +46,7 @@ These are exact measured results from 11 anonymized real-world repositories acro
 ### Install once
 
 ```bash
-python3 -m pip install --user --no-build-isolation "git+https://github.com/richie777cfc/tokensaver.git"
+python3 -m pip install --user --no-build-isolation "git+https://github.com/richie777cfc/tokensaver-ai.git"
 ```
 
 ### Add to any repo

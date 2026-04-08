@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.1
+
+- Renamed the PyPI distribution to `tokensaver-ai` while keeping the CLI command as `tokensaver`
+- Simplified package metadata for publishing by switching to SPDX license metadata
+- Prepared install docs for the renamed package/repository path
+- No schema or CLI behavior changes
 ## 1.2.0
 
 - Added 4 new first-class framework plugins:
