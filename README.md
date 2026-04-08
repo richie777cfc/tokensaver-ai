@@ -1,16 +1,14 @@
 # TokenSaver
 
-**Give coding agents a compressed map of your repo before they read your code.**
+**Stop making coding agents reread your whole repo.**
 
-```bash
-python3 -m pip install --user tokensaver-ai
-cd /path/to/your-repo
-tokensaver init .
-```
+TokenSaver compiles your repository into a compact context bundle that agents can use before they touch raw source. Instead of burning tokens re-parsing files on every task, agents start with the structure that actually matters: modules, APIs, routes, config, commands, and exact compression metrics.
 
-TokenSaver turns large repositories into compact, agent-ready context bundles. It extracts the structural facts coding agents actually need, installs agent rules automatically, and measures exact token compression so you can see the impact.
+That means faster repo understanding, less wasted context, and more consistent answers across large codebases.
 
-Works with **Cursor**, **Claude Code**, **Codex**, **Windsurf**, and **MCP**.
+Used across 11 anonymized real-world repositories with up to 77.15x measured compression.
+
+Works with **Cursor**, **Claude Code**, **Codex**, **Windsurf**, and **MCP-enabled workflows**.
 
 ---
 

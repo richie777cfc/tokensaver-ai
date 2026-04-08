@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.3
+
+- Rewrote the README opening to lead with the agent-context problem and user-facing outcomes
+- Moved installation emphasis back to the Quick Start section instead of the hero section
+- Updated the PyPI long description to match the stronger top-of-page positioning
+
 ## 1.2.2
 
 - Rewrote the README top section to be more product-focused and easier to scan
