@@ -14,10 +14,12 @@ from tokensaver.plugins.python_web import PYTHON_WEB_PLUGIN
 from tokensaver.plugins.react_native import REACT_NATIVE_PLUGIN
 from tokensaver.plugins.react_web import REACT_WEB_PLUGIN
 from tokensaver.plugins.spring_boot import SPRING_BOOT_PLUGIN
+from tokensaver.plugins.workspace import WORKSPACE_PLUGIN
 
 PLUGINS: tuple[TokenSaverPlugin, ...] = (
     FLUTTER_PLUGIN,
     REACT_NATIVE_PLUGIN,
+    WORKSPACE_PLUGIN,
     NEXTJS_PLUGIN,
     ANGULAR_PLUGIN,
     REACT_WEB_PLUGIN,

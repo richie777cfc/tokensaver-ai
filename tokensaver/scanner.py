@@ -2,13 +2,19 @@
 
 from __future__ import annotations
 
-import json
 import os
 from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from tokensaver.tokenizer import count_file_tokens, tokenizer_name
+from tokensaver.workspaces import (
+    detect_project_framework,
+    detect_python_framework,
+    detect_workspace_components,
+    iter_project_roots,
+    top_level_project_roots,
+)
 
 SKIP_DIRS = {
     "node_modules",
@@ -35,6 +41,7 @@ EXT_MAP = {
     ".kt": "kotlin",
     ".java": "java",
     ".swift": "swift",
+    ".php": "php",
     ".ts": "typescript",
     ".tsx": "typescript",
     ".js": "javascript",
@@ -51,6 +58,7 @@ EXT_MAP = {
 }
 
 PACKAGE_MANAGER_FILES = {
+    "composer.lock": "composer",
     "pnpm-lock.yaml": "pnpm",
     "yarn.lock": "yarn",
     "package-lock.json": "npm",
@@ -166,133 +174,51 @@ def scan_project(root: str | Path) -> ScanResult:
 
 
 def _detect_framework(root: Path) -> str:
-    if (root / "pubspec.yaml").exists():
-        return "flutter"
-
-    if _is_ios_project(root):
-        return "ios_swift"
-
-    package_json = root / "package.json"
-    if package_json.exists():
-        try:
-            package_data = json.loads(package_json.read_text())
-        except json.JSONDecodeError:
-            package_data = {}
-        deps = {
-            **package_data.get("dependencies", {}),
-            **package_data.get("devDependencies", {}),
-        }
-        if "react-native" in deps:
-            return "react_native"
-        if "next" in deps:
-            return "nextjs"
-        if "@angular/core" in deps:
-            return "angular"
-        if "react" in deps:
-            return "react"
-        return "node"
-
-    if (root / "build.gradle.kts").exists() or (root / "build.gradle").exists():
-        if _has_spring_boot(root):
-            return "spring_boot"
-        return "android_native"
-
-    if (root / "pom.xml").exists():
-        if _has_spring_boot(root):
-            return "spring_boot"
-
-    python_framework = _detect_python_framework(root)
-    if python_framework:
-        return python_framework
-
-    if (root / "Cargo.toml").exists():
-        return "rust"
-    if (root / "go.mod").exists():
-        return "go"
+    root_framework = detect_project_framework(root)
+    nested_components = [item for item in detect_workspace_components(root) if item.root != root]
+    nested_project_roots = [path for path in top_level_project_roots(root) if path != root]
+    if len(nested_project_roots) >= 2:
+        return "workspace"
+    if root_framework:
+        return root_framework
+    for component in nested_components:
+        return component.framework
+    if any(root.glob("*.php")) or any(child.is_dir() and any(child.glob("*.php")) for child in root.iterdir()):
+        return "php"
     if any(root.glob("*.py")) or any(child.is_dir() and (child / "__init__.py").exists() for child in root.iterdir()):
         return "python"
     return "unknown"
 
-
-def _is_ios_project(root: Path) -> bool:
-    """Detect native iOS/Swift projects (not Flutter, not RN)."""
-    has_xcodeproj = any(root.glob("*.xcodeproj")) or any(root.glob("*.xcworkspace"))
-    has_package_swift = (root / "Package.swift").exists()
-    if not has_xcodeproj and not has_package_swift:
-        return False
-    if (root / "pubspec.yaml").exists():
-        return False
-    if (root / "package.json").exists():
-        return False
-    has_swift_files = any(root.rglob("*.swift"))
-    return has_swift_files
-
-
-def _has_spring_boot(root: Path) -> bool:
-    """Check if a Java/Kotlin project uses Spring Boot."""
-    for gradle_name in ("build.gradle.kts", "build.gradle"):
-        gradle = root / gradle_name
-        if gradle.exists():
-            content = gradle.read_text(errors="ignore")[:3000]
-            if "spring-boot" in content or "org.springframework.boot" in content:
-                return True
-    pom = root / "pom.xml"
-    if pom.exists():
-        content = pom.read_text(errors="ignore")[:5000]
-        if "spring-boot" in content:
-            return True
-    src_main = root / "src" / "main" / "java"
-    if src_main.exists():
-        for fp in src_main.rglob("*Application.java"):
-            try:
-                content = fp.read_text(errors="ignore")[:1000]
-                if "@SpringBootApplication" in content:
-                    return True
-            except OSError:
-                continue
-    return False
-
-
 def _detect_python_framework(root: Path) -> str | None:
     """Detect specific Python web framework (FastAPI, Django, Flask) or generic Python."""
-    has_manage_py = (root / "manage.py").exists()
-    has_pyproject = (root / "pyproject.toml").exists()
-    has_requirements = (root / "requirements.txt").exists()
-
-    if not has_manage_py and not has_pyproject and not has_requirements:
-        return None
-
-    if has_manage_py:
-        return "django"
-
-    dep_content = ""
-    if has_requirements:
-        try:
-            dep_content += (root / "requirements.txt").read_text(errors="ignore").lower()
-        except OSError:
-            pass
-    if has_pyproject:
-        try:
-            dep_content += (root / "pyproject.toml").read_text(errors="ignore").lower()
-        except OSError:
-            pass
-
-    if "django" in dep_content:
-        return "django"
-    if "fastapi" in dep_content:
-        return "fastapi"
-    if "flask" in dep_content:
-        return "flask"
-    return "python"
+    return detect_python_framework(root)
 
 
 def _detect_package_managers(root: Path) -> list[str]:
     managers = []
-    for file_name, manager in PACKAGE_MANAGER_FILES.items():
-        if (root / file_name).exists():
-            managers.append(manager)
-    if (root / "package.json").exists() and not managers:
-        managers.append("npm")
+    seen = set()
+
+    for project_root in iter_project_roots(root):
+        project_has_manager = False
+        for file_name, manager in PACKAGE_MANAGER_FILES.items():
+            if not (project_root / file_name).exists():
+                continue
+            project_has_manager = True
+            if manager not in seen:
+                seen.add(manager)
+                managers.append(manager)
+        if (project_root / "package.json").exists():
+            if not project_has_manager and "npm" not in seen:
+                seen.add("npm")
+                managers.append("npm")
+        if (project_root / "pubspec.yaml").exists():
+            if not project_has_manager and "pub" not in seen:
+                seen.add("pub")
+                managers.append("pub")
+        if (project_root / "composer.json").exists():
+            if not project_has_manager and "composer" not in seen:
+                seen.add("composer")
+                managers.append("composer")
     return managers
 
 
@@ -305,11 +231,23 @@ def _detect_manifests(root: Path) -> list[str]:
         "Cargo.toml",
         "go.mod",
         "Dockerfile",
+        "composer.json",
         "docker-compose.yml",
         "docker-compose.yaml",
         "Makefile",
     ]
-    return [name for name in manifest_names if (root / name).exists()]
+    manifests = []
+    seen = set()
+    for project_root in iter_project_roots(root):
+        for name in manifest_names:
+            path = project_root / name
+            if not path.exists():
+                continue
+            rel = str(path.relative_to(root))
+            if rel not in seen:
+                seen.add(rel)
+                manifests.append(rel)
+    return manifests
 
 
 def _detect_entrypoints(root: Path) -> list[str]:
@@ -320,13 +258,30 @@ def _detect_entrypoints(root: Path) -> list[str]:
         "index.js",
         "main.py",
         "app.py",
+        "index.php",
+        "public/index.php",
+        "routes/api.php",
         "manage.py",
         "server.py",
         "tokensaver_cli.py",
         "src/main.ts",
         "src/index.ts",
         "src/index.js",
+        "src/app/page.tsx",
+        "src/app/layout.tsx",
+        "app/main.py",
         "main.dart",
         "lib/main.dart",
     ]
-    return [path for path in candidates if (root / path).exists()]
+    entrypoints = []
+    seen = set()
+    for project_root in iter_project_roots(root):
+        for candidate in candidates:
+            path = project_root / candidate
+            if not path.exists():
+                continue
+            rel = str(path.relative_to(root))
+            if rel not in seen:
+                seen.add(rel)
+                entrypoints.append(rel)
+    return entrypoints

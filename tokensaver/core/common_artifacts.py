@@ -11,6 +11,7 @@ except ModuleNotFoundError:
 
 from tokensaver.core.helpers import categorize_command, language_source_refs, meta, sources, value_with_meta
 from tokensaver.core.models import ArtifactResult, BuildContext
+from tokensaver.workspaces import iter_project_roots, relative_cwd
 
 
 def build_common_artifacts(ctx: BuildContext) -> list[ArtifactResult]:
@@ -73,65 +74,99 @@ def build_project_summary(ctx: BuildContext) -> ArtifactResult:
 
 def build_commands(ctx: BuildContext) -> ArtifactResult:
     root = ctx.root
-    scan = ctx.scan
     commands = []
     source_files = set()
 
-    package_json = root / "package.json"
-    if package_json.exists():
-        try:
-            package_data = json.loads(package_json.read_text())
-        except json.JSONDecodeError:
-            package_data = {}
-        for name, command in package_data.get("scripts", {}).items():
-            commands.append(
-                {
-                    "name": name,
-                    "category": categorize_command(name),
-                    "command": command,
-                    "cwd": ".",
-                    "verified": False,
-                    "source": [{"file": "package.json"}],
-                    "extractor": "package_json_scripts_v1",
-                    "confidence": 1.0,
-                }
-            )
-        source_files.add(package_json)
+    for project_root in iter_project_roots(root):
+        cwd = relative_cwd(root, project_root)
 
-    pyproject = root / "pyproject.toml"
-    if pyproject.exists():
-        try:
-            pyproject_data = tomllib.loads(pyproject.read_text())
-        except Exception:
-            pyproject_data = {}
-        for name, command in pyproject_data.get("project", {}).get("scripts", {}).items():
-            commands.append(
-                {
-                    "name": name,
-                    "category": categorize_command(name),
-                    "command": command,
-                    "cwd": ".",
-                    "verified": False,
-                    "source": [{"file": "pyproject.toml"}],
-                    "extractor": "pyproject_scripts_v1",
-                    "confidence": 1.0,
-                }
-            )
-        for name, command in pyproject_data.get("tool", {}).get("taskipy", {}).get("tasks", {}).items():
-            commands.append(
-                {
-                    "name": name,
-                    "category": categorize_command(name),
-                    "command": command if isinstance(command, str) else str(command),
-                    "cwd": ".",
-                    "verified": False,
-                    "source": [{"file": "pyproject.toml"}],
-                    "extractor": "pyproject_taskipy_v1",
-                    "confidence": 0.9,
-                }
-            )
-        if pyproject_data:
-            source_files.add(pyproject)
+        package_json = project_root / "package.json"
+        if package_json.exists():
+            try:
+                package_data = json.loads(package_json.read_text())
+            except json.JSONDecodeError:
+                package_data = {}
+            rel_package = str(package_json.relative_to(root))
+            for name, command in package_data.get("scripts", {}).items():
+                scoped_name = name if cwd == "." else f"{cwd}:{name}"
+                commands.append(
+                    {
+                        "name": scoped_name,
+                        "category": categorize_command(name),
+                        "command": command,
+                        "cwd": cwd,
+                        "verified": False,
+                        "source": [{"file": rel_package}],
+                        "extractor": "package_json_scripts_v1",
+                        "confidence": 1.0,
+                    }
+                )
+            source_files.add(package_json)
+
+        pyproject = project_root / "pyproject.toml"
+        if pyproject.exists():
+            try:
+                pyproject_data = tomllib.loads(pyproject.read_text())
+            except Exception:
+                pyproject_data = {}
+            rel_pyproject = str(pyproject.relative_to(root))
+            for name, command in pyproject_data.get("project", {}).get("scripts", {}).items():
+                scoped_name = name if cwd == "." else f"{cwd}:{name}"
+                commands.append(
+                    {
+                        "name": scoped_name,
+                        "category": categorize_command(name),
+                        "command": command,
+                        "cwd": cwd,
+                        "verified": False,
+                        "source": [{"file": rel_pyproject}],
+                        "extractor": "pyproject_scripts_v1",
+                        "confidence": 1.0,
+                    }
+                )
+            for name, command in pyproject_data.get("tool", {}).get("taskipy", {}).get("tasks", {}).items():
+                scoped_name = name if cwd == "." else f"{cwd}:{name}"
+                commands.append(
+                    {
+                        "name": scoped_name,
+                        "category": categorize_command(name),
+                        "command": command if isinstance(command, str) else str(command),
+                        "cwd": cwd,
+                        "verified": False,
+                        "source": [{"file": rel_pyproject}],
+                        "extractor": "pyproject_taskipy_v1",
+                        "confidence": 0.9,
+                    }
+                )
+            if pyproject_data:
+                source_files.add(pyproject)
+
+        composer_json = project_root / "composer.json"
+        if composer_json.exists():
+            try:
+                composer_data = json.loads(composer_json.read_text())
+            except json.JSONDecodeError:
+                composer_data = {}
+            rel_composer = str(composer_json.relative_to(root))
+            for name, command in composer_data.get("scripts", {}).items():
+                scoped_name = name if cwd == "." else f"{cwd}:{name}"
+                if isinstance(command, list):
+                    command_text = " && ".join(str(item) for item in command)
+                else:
+                    command_text = str(command)
+                commands.append(
+                    {
+                        "name": scoped_name,
+                        "category": categorize_command(name),
+                        "command": command_text,
+                        "cwd": cwd,
+                        "verified": False,
+                        "source": [{"file": rel_composer}],
+                        "extractor": "composer_scripts_v1",
+                        "confidence": 1.0,
+                    }
+                )
+            source_files.add(composer_json)
 
     makefile = root / "Makefile"
     if makefile.exists():
@@ -178,23 +213,28 @@ def build_commands(ctx: BuildContext) -> ArtifactResult:
                 )
             source_files.add(workflow_file)
 
-    pubspec = root / "pubspec.yaml"
-    if scan.framework == "flutter" and pubspec.exists():
-        flutter_commands = [
-            ("pub_get", "setup", "flutter pub get", 0.95),
-            ("run", "dev", "flutter run", 0.95),
-            ("test", "test", "flutter test", 0.95),
-            ("analyze", "lint", "flutter analyze", 0.95),
-        ]
+    flutter_commands = [
+        ("pub_get", "setup", "flutter pub get", 0.95),
+        ("run", "dev", "flutter run", 0.95),
+        ("test", "test", "flutter test", 0.95),
+        ("analyze", "lint", "flutter analyze", 0.95),
+    ]
+    for project_root in iter_project_roots(root):
+        pubspec = project_root / "pubspec.yaml"
+        if not pubspec.exists():
+            continue
+        cwd = relative_cwd(root, project_root)
+        rel_pubspec = str(pubspec.relative_to(root))
         for name, category, command, confidence in flutter_commands:
+            scoped_name = name if cwd == "." else f"{cwd}:{name}"
             commands.append(
                 {
-                    "name": name,
+                    "name": scoped_name,
                     "category": category,
                     "command": command,
-                    "cwd": ".",
+                    "cwd": cwd,
                     "verified": False,
-                    "source": [{"file": "pubspec.yaml"}],
+                    "source": [{"file": rel_pubspec}],
                     "extractor": "flutter_standard_commands_v1",
                     "confidence": confidence,
                 }

@@ -9,6 +9,8 @@ from tokensaver.core.helpers import (
     ENV_PATTERNS,
     EXPRESS_USE_PATTERN,
     NODE_API_PATTERN,
+    PHP_API_PATTERN,
+    PHP_ROUTE_PATTERN,
     PYTHON_API_PATTERN,
     PYTHON_ROUTE_PATTERN,
     REACT_ROUTE_PATTERN,
@@ -28,7 +30,7 @@ from tokensaver.core.models import ArtifactResult, BuildContext
 @dataclass(frozen=True)
 class GenericPlugin:
     name: str = "generic"
-    frameworks: set[str] = frozenset({"node", "python", "unknown", "rust"})
+    frameworks: set[str] = frozenset({"node", "python", "unknown", "rust", "php"})
 
     def build_artifacts(self, ctx: BuildContext) -> list[ArtifactResult]:
         return [
@@ -62,6 +64,11 @@ def build_api_index(ctx: BuildContext) -> ArtifactResult:
                 source_files.add(file_path)
         elif file_path.suffix in {".js", ".ts", ".jsx", ".tsx"}:
             for _, method, path in match_with_lines(content, NODE_API_PATTERN, method_group=1, path_group=2):
+                if add_api_file_entry(api_files, rel_path=rel_path, module=module, path=path, name="", method=method.upper()):
+                    endpoint_count += 1
+                source_files.add(file_path)
+        elif file_path.suffix == ".php":
+            for _, method, path in match_with_lines(content, PHP_API_PATTERN, method_group=1, path_group=2):
                 if add_api_file_entry(api_files, rel_path=rel_path, module=module, path=path, name="", method=method.upper()):
                     endpoint_count += 1
                 source_files.add(file_path)
@@ -132,6 +139,17 @@ def build_route_index(ctx: BuildContext) -> ArtifactResult:
             if file_path.suffix == ".py":
                 for line_no, _decorator, route_path in match_with_lines(
                     content, PYTHON_ROUTE_PATTERN, method_group=1, path_group=2
+                ):
+                    routes[route_path] = {
+                        "path": route_path,
+                        "source": [{"file": rel_path, "line": line_no}],
+                        "usage_count": 1,
+                        "navigated_from": [],
+                    }
+                    source_files.add(file_path)
+            if file_path.suffix == ".php":
+                for line_no, _method, route_path in match_with_lines(
+                    content, PHP_ROUTE_PATTERN, method_group=1, path_group=2
                 ):
                     routes[route_path] = {
                         "path": route_path,

@@ -10,6 +10,17 @@ First-class extractors currently exist for:
 
 - Flutter
 - React Native
+- Next.js
+- Workspace (multi-app)
+- Angular
+- React (web)
+- FastAPI
+- Django
+- Flask
+- Spring Boot
+- Android Native
+- iOS Swift
+- Go
 
 These stacks have dedicated plugins with deep extraction for routes, navigation, API surfaces, config, and commands.
 
@@ -19,16 +30,17 @@ The generic plugin provides useful artifacts for:
 
 - Node.js / Express
 - Python (FastAPI, Flask, decorator-based frameworks)
+- PHP
 - Next.js
 - React (web)
 
 The generic plugin provides:
 
 - Module graph based on directory structure
-- API index for Express/Node.js routes and Python decorator routes
-- Route index for Express mount paths, React Router `<Route>` elements, Next.js file-based routes, and Python decorator routes
-- Config index for environment variable references (`process.env`, `os.getenv`, `os.environ`, `.env` files)
-- Commands from `package.json` scripts, `pyproject.toml` scripts, Makefiles, and GitHub Actions
+- API index for Express/Node.js routes, Python decorator routes, and generic PHP router calls
+- Route index for Express mount paths, React Router `<Route>` elements, Next.js file-based routes, Python decorator routes, and generic PHP router calls
+- Config index for environment variable references (`process.env`, `os.getenv`, `os.environ`, `getenv`, `$_ENV`, `$_SERVER`, `.env` files)
+- Commands from `package.json` scripts, `pyproject.toml` scripts, `composer.json` scripts, Makefiles, and GitHub Actions
 
 ### Detected-only / limited
 
@@ -55,9 +67,9 @@ These produce correct framework detection but generic-quality artifacts.
 
 ## Unsupported or Partial Areas
 
-- Monorepo support: TokenSaver scans from a single root. Multi-package monorepos are partially handled via module graph detection but do not receive per-package builds.
+- Monorepo support: TokenSaver now detects common nested multi-app workspaces such as `frontend/` + `backend/`, but broader multi-package monorepos still do not receive fully independent per-package builds.
 - Dynamic route construction: Routes built from string interpolation or runtime values are not extracted.
-- Custom build systems: Only `package.json`, `pyproject.toml`, `Makefile`, and GitHub Actions workflows are scanned for commands.
+- Custom build systems: Only `package.json`, `pyproject.toml`, `composer.json`, `Makefile`, and GitHub Actions workflows are scanned for commands.
 - Non-file configuration: `.env` file keys are extracted if the file exists, but `.env` parsing is limited to simple `KEY=value` lines.
 
 ## Stability

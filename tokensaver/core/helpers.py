@@ -10,6 +10,7 @@ from tokensaver import SCHEMA_VERSION
 from tokensaver.tokenizer import count_file_tokens
 
 CODE_EXTENSIONS = {
+    ".php",
     ".py",
     ".ts",
     ".tsx",
@@ -26,6 +27,9 @@ CODE_EXTENSIONS = {
 ENV_PATTERNS = [
     ("python_os_getenv", re.compile(r"os\.getenv\(\s*['\"]([A-Z0-9_]+)['\"]")),
     ("python_os_environ", re.compile(r"os\.environ\[\s*['\"]([A-Z0-9_]+)['\"]\s*\]")),
+    ("php_getenv", re.compile(r"getenv\(\s*['\"]([A-Z0-9_]+)['\"]\s*\)")),
+    ("php_env", re.compile(r"\$_ENV\[\s*['\"]([A-Z0-9_]+)['\"]\s*\]")),
+    ("php_server", re.compile(r"\$_SERVER\[\s*['\"]([A-Z0-9_]+)['\"]\s*\]")),
     ("node_process_env", re.compile(r"process\.env(?:\.|\[\s*['\"])([A-Z0-9_]+)")),
     ("dart_string_env", re.compile(r"String\.fromEnvironment\(\s*['\"]([A-Z0-9_]+)['\"]")),
     ("dart_dotenv", re.compile(r"dotenv\.env\[\s*['\"]([A-Z0-9_]+)['\"]\s*\]")),
@@ -37,11 +41,16 @@ PYTHON_API_PATTERN = re.compile(
 NODE_API_PATTERN = re.compile(
     r"(?:app|router)\.(get|post|put|delete|patch)\(\s*['\"]([^'\"]+)['\"]"
 )
+PHP_API_PATTERN = re.compile(
+    r"(?:\$[A-Za-z_][A-Za-z0-9_]*|[A-Za-z_][A-Za-z0-9_]*)?(?:->|::)(get|post|put|delete|patch|options|head)\(\s*['\"]([^'\"]+)['\"]",
+    re.IGNORECASE,
+)
 REACT_ROUTE_PATTERN = re.compile(r"<Route[^>]+path=['\"]([^'\"]+)['\"]")
 EXPRESS_USE_PATTERN = re.compile(r"(?:app|router)\.use\(\s*['\"]([^'\"]+)['\"]")
 PYTHON_ROUTE_PATTERN = re.compile(
     r"@(?:\w+\.)?(?:app|router|bp|blueprint)\.(route|get|post|put|delete|patch)\(\s*['\"]([^'\"]+)['\"]"
 )
+PHP_ROUTE_PATTERN = PHP_API_PATTERN
 GETX_ROUTE_CONST = re.compile(r"static\s+const\s+(\w+)\s*=\s*['\"]([^'\"]+)['\"]")
 GETX_ROUTE_BINDING = re.compile(
     r"GetPage\s*\([^)]*name\s*:\s*(?:AppRoutes\.)?(\w+)[^)]*page\s*:\s*\(\)\s*=>\s*(\w+)",
@@ -126,6 +135,17 @@ def module_roots(root: Path, framework: str) -> list[Path]:
                 candidates.append(child)
         if not candidates and any(path.suffix == ".py" for path in root.iterdir() if path.is_file()):
             candidates.append(root)
+    elif framework == "php":
+        for base_name in ("src", "app", "routes", "public"):
+            base_dir = root / base_name
+            if base_dir.exists() and base_dir.is_dir():
+                candidates.append(base_dir)
+                candidates.extend(path for path in sorted(base_dir.iterdir()) if path.is_dir() and any(code_files_under(path)))
+        for child in sorted(root.iterdir()):
+            if child.is_dir() and child not in candidates and any(path.suffix == ".php" for path in child.rglob("*.php")):
+                candidates.append(child)
+        if not candidates and any(path.suffix == ".php" for path in root.iterdir() if path.is_file()):
+            candidates.append(root)
     elif framework == "spring_boot":
         src_main = root / "src" / "main" / "java"
         if src_main.exists():
@@ -204,6 +224,7 @@ def code_files_for_language(root: Path, language: str) -> set[Path]:
         "kotlin": ".kt",
         "go": ".go",
         "rust": ".rs",
+        "php": ".php",
     }
     extension = extension_map.get(language)
     if not extension:

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.0
+
+- Added generic PHP project support detected via `composer.json` or `*.php` files
+- Extended the generic extractor to capture PHP router-style API routes, route index entries, env/config references, and Composer scripts
+- Added first-class workspace detection for mixed multi-app repositories with nested project roots
+- Added a composite workspace plugin that merges artifacts from supported child apps
+- Fixed nested-project detection so Flutter platform folders are not misclassified as standalone workspace apps
+- Added public benchmark fixtures for PHP and mixed workspaces; fixture suite now covers 15 stacks with 100% framework detection accuracy
+- Updated release smoke checks, benchmark contracts, and support documentation for PHP + workspace support
+
 ## 1.2.3
 
 - Rewrote the README opening to lead with the agent-context problem and user-facing outcomes

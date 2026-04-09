@@ -23,6 +23,8 @@ RN_FIXTURE = REPO_ROOT / "benchmarks" / "fixtures" / "react_native_fixture"
 PYTHON_FIXTURE = REPO_ROOT / "benchmarks" / "fixtures" / "python_fixture"
 NODE_FIXTURE = REPO_ROOT / "benchmarks" / "fixtures" / "node_fixture"
 NEXTJS_FIXTURE = REPO_ROOT / "benchmarks" / "fixtures" / "nextjs_fixture"
+PHP_FIXTURE = REPO_ROOT / "benchmarks" / "fixtures" / "php_fixture"
+WORKSPACE_FIXTURE = REPO_ROOT / "benchmarks" / "fixtures" / "nextjs_python_web_workspace_fixture"
 
 BUILD_ARTIFACT_FILES = {
     "PROJECT_SUMMARY.json",
@@ -47,6 +49,8 @@ class BuildOutputContractTests(unittest.TestCase):
             ("python", PYTHON_FIXTURE),
             ("node", NODE_FIXTURE),
             ("nextjs", NEXTJS_FIXTURE),
+            ("php", PHP_FIXTURE),
+            ("workspace", WORKSPACE_FIXTURE),
         ]:
             with tempfile.TemporaryDirectory() as temp_dir:
                 build_project(fixture_path, output_dir=temp_dir)

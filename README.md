@@ -65,7 +65,7 @@ TokenSaver helps agents start with structure instead of raw source:
 | No awareness of project structure | Module graph, API index, route map, config keys |
 | Context window fills up fast | Exact per-artifact and repo-level compression metrics |
 
-**Real-world proof:** up to **77.15x** measured compression across 11 anonymized real-world repositories and 13/13 public fixtures passing with 100% framework detection.
+**Real-world proof:** up to **77.15x** measured compression across 11 anonymized real-world repositories and 15/15 public fixtures passing with 100% framework detection.
 
 **Published real-world benchmarks** (anonymized, exact `tiktoken` counts):
 
@@ -196,7 +196,7 @@ tokensaver serve /path/to/repo
 
 ---
 
-## Supported Frameworks (15 stacks, 11 plugins)
+## Supported Frameworks (17 stacks, 12 plugins)
 
 ### First-Class Plugins (deep extraction)
 
@@ -205,6 +205,7 @@ tokensaver serve /path/to/repo
 | **Flutter** | `flutter` | `pubspec.yaml` | GetX routes, Dart API URLs, RemoteConfig keys, module graph |
 | **React Native** | `react_native` | `package.json` → `react-native` | Stack.Screen navigation, Axios/fetch APIs, RN Config, module graph |
 | **Next.js** | `nextjs` | `package.json` → `next` | App Router + Pages Router, API routes, server actions, `next.config`, `NEXT_PUBLIC_*` env |
+| **Workspace (multi-app)** | `workspace` | multiple nested app roots such as `frontend/` + `backend/` | Merged artifacts from child apps, including nested routes, APIs, config, module graph, and commands |
 | **Angular** | `angular` | `package.json` → `@angular/core` | RouterModule routes, HttpClient APIs, `environment.ts` config, `@Component`/`@Injectable` |
 | **React (web)** | `react_web` | `package.json` → `react` | React Router v5+v6, fetch/axios APIs, `REACT_APP_*` env, lazy imports |
 | **FastAPI** | `python_web` | deps → `fastapi` | Decorator routes, Pydantic models, middleware, env config |
@@ -221,13 +222,14 @@ tokensaver serve /path/to/repo
 |---|---|---|
 | Node.js / Express | `package.json` | Express routes, mount paths, `process.env`, module graph |
 | Python (generic) | `*.py` files | Decorator routes, env config, module graph |
+| PHP | `composer.json` or `*.php` files | Generic PHP routes, env config, composer scripts, module graph |
 | Rust | `Cargo.toml` | Module graph, framework detection |
 
 ---
 
-## Benchmark Results (13 fixture suite)
+## Benchmark Results (15 fixture suite)
 
-All 13 fixtures pass with `ok` status, 100% framework detection accuracy:
+All 15 fixtures pass with `ok` status, 100% framework detection accuracy:
 
 | Fixture | Framework | Status | Plugin |
 |---|---|---|---|
@@ -244,6 +246,8 @@ All 13 fixtures pass with `ok` status, 100% framework detection accuracy:
 | Go | `go` | ok | `go` |
 | Node.js | `node` | ok | `generic` |
 | Python | `python` | ok | `generic` |
+| PHP | `php` | ok | `generic` |
+| Workspace | `workspace` | ok | `workspace` |
 
 ---
 

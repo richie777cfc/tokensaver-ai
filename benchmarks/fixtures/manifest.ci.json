@@ -118,6 +118,24 @@
       "expected_framework": "angular",
       "tags": ["fixture", "angular"],
       "private": false
+    },
+    {
+      "id": "workspace-fixture",
+      "label": "Workspace Fixture",
+      "publish_label": "Workspace Fixture",
+      "root": "./nextjs_python_web_workspace_fixture",
+      "expected_framework": "workspace",
+      "tags": ["fixture", "workspace"],
+      "private": false
+    },
+    {
+      "id": "php-fixture",
+      "label": "PHP Fixture",
+      "publish_label": "PHP Fixture",
+      "root": "./php_fixture",
+      "expected_framework": "php",
+      "tags": ["fixture", "php"],
+      "private": false
     }
   ]
 }

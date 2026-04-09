@@ -38,12 +38,14 @@ FIRST_CLASS_FIXTURES = {
     "ios_swift": FIXTURES_DIR / "ios_swift_fixture",
     "react_web": FIXTURES_DIR / "react_web_fixture",
     "angular": FIXTURES_DIR / "angular_fixture",
+    "workspace": FIXTURES_DIR / "nextjs_python_web_workspace_fixture",
 }
 
 GENERIC_SUPPORTED_FIXTURES = {
     "python": FIXTURES_DIR / "python_fixture",
     "node": FIXTURES_DIR / "node_fixture",
     "nextjs": FIXTURES_DIR / "nextjs_fixture",
+    "php": FIXTURES_DIR / "php_fixture",
 }
 
 
@@ -140,7 +142,7 @@ class GenericSupportedUsefulnessTests(unittest.TestCase):
             )
 
     def test_config_index_has_entries_for_backend_stacks(self) -> None:
-        for name in ("python", "node"):
+        for name in ("python", "node", "php"):
             arts = self._builds[name]
             config_keys = arts["CONFIG_INDEX"].get("config_keys", [])
             self.assertGreater(
@@ -149,7 +151,7 @@ class GenericSupportedUsefulnessTests(unittest.TestCase):
             )
 
     def test_api_or_route_index_non_empty_for_backend_stacks(self) -> None:
-        for name in ("python", "node"):
+        for name in ("python", "node", "php"):
             arts = self._builds[name]
             api_count = len(arts["API_INDEX"].get("files", []))
             route_count = len(arts["ROUTE_INDEX"].get("files", []))

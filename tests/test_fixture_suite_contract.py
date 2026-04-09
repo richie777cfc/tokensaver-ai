@@ -26,7 +26,7 @@ EXPECTED_BENCHMARK_IDS = {
     "node-fixture", "nextjs-fixture", "fastapi-fixture",
     "django-fixture", "spring-boot-fixture", "go-fixture",
     "android-native-fixture", "ios-swift-fixture",
-    "react-web-fixture", "angular-fixture",
+    "react-web-fixture", "angular-fixture", "workspace-fixture", "php-fixture",
 }
 
 SUITE_SUMMARY_REQUIRED_KEYS = {
@@ -126,6 +126,8 @@ class FixtureSuiteContractTests(unittest.TestCase):
             "ios-swift-fixture",
             "react-web-fixture",
             "angular-fixture",
+            "workspace-fixture",
+            "php-fixture",
         ]
         for fixture_id in supported_ids:
             self.assertEqual(
